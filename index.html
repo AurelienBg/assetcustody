@@ -1,0 +1,2825 @@
+<!DOCTYPE html>
+<html lang="fr" id="root">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ownership · Custody · Possession — XRPL Triad</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800;9..144,900&family=JetBrains+Mono:wght@400;500;700&family=Inter+Tight:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0a0a0a;
+  --paper:#f4f0e8;
+  --paper-dark:#e8e2d4;
+  --accent-own:#c8392e;      /* rouge — droit */
+  --accent-cust:#1a4d8f;     /* bleu — mandat */
+  --accent-poss:#d4a017;     /* or — fait */
+  --muted:#6b6358;
+  --rule:#1a1a1a;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  font-family:'Inter Tight',sans-serif;
+  background:var(--paper);
+  color:var(--ink);
+  line-height:1.5;
+  padding:40px 24px 80px;
+  background-image:
+    radial-gradient(circle at 20% 10%, rgba(200,57,46,0.04) 0%, transparent 40%),
+    radial-gradient(circle at 80% 60%, rgba(26,77,143,0.04) 0%, transparent 40%),
+    radial-gradient(circle at 50% 90%, rgba(212,160,23,0.04) 0%, transparent 40%);
+}
+
+.container{max-width:1100px;margin:0 auto}
+
+/* CONTENU MULTI-NIVEAUX
+   - .lvl-main = niveau débutant, affichage normal
+   - .lvl-more = bloc dépliable contenant les niveaux intermédiaire et avancé
+*/
+.lvl-more{
+  margin-top:18px;
+  border-top:1px dashed var(--ink);
+  padding-top:16px;
+}
+.lvl-item{
+  margin-bottom:18px;
+  padding:14px 18px;
+  background:rgba(0,0,0,0.03);
+  border-left:3px solid var(--muted);
+}
+.lvl-item:last-child{margin-bottom:0}
+.lvl-tag{
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--paper);
+  background:var(--muted);
+  padding:3px 8px;
+  display:inline-block;
+  margin-bottom:8px;
+}
+.lvl-item.lvl-aware{border-left-color:var(--accent-cust)}
+.lvl-item.lvl-aware .lvl-tag{background:var(--accent-cust)}
+.lvl-item.lvl-advanced{border-left-color:var(--accent-own)}
+.lvl-item.lvl-advanced .lvl-tag{background:var(--accent-own)}
+
+/* HEADER ÉDITORIAL */
+.header{
+  border-top:3px solid var(--ink);
+  border-bottom:1px solid var(--ink);
+  padding:18px 0 14px;
+  margin-bottom:48px;
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  flex-wrap:wrap;
+  gap:12px;
+}
+.header .kicker{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+.header .edition{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  letter-spacing:1px;
+  color:var(--muted);
+}
+
+h1{
+  font-family:'Fraunces',serif;
+  font-weight:900;
+  font-size:clamp(40px, 7vw, 84px);
+  line-height:0.95;
+  letter-spacing:-0.03em;
+  margin-bottom:16px;
+}
+h1 .sep{color:var(--accent-own);font-weight:400;font-style:italic;font-size:0.7em;vertical-align:0.05em}
+h1 .word-own{color:var(--accent-own)}
+h1 .word-cust{color:var(--accent-cust)}
+h1 .word-poss{color:var(--accent-poss)}
+
+.dek{
+  font-family:'Fraunces',serif;
+  font-style:italic;
+  font-size:22px;
+  line-height:1.35;
+  max-width:700px;
+  color:var(--ink);
+  margin-bottom:64px;
+  border-left:3px solid var(--ink);
+  padding-left:20px;
+}
+
+/* SECTION TITRE */
+.section-title{
+  font-family:'JetBrains Mono',monospace;
+  font-size:12px;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  color:var(--ink);
+  border-bottom:1px solid var(--ink);
+  padding-bottom:8px;
+  margin:0 0 32px;
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+}
+.section-title .num{
+  font-weight:700;
+  color:var(--accent-own);
+}
+
+/* SCHEMA 1 : LES TROIS CONCEPTS */
+.triad{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:0;
+  margin-bottom:80px;
+  border:2px solid var(--ink);
+  background:var(--paper);
+}
+.triad-card{
+  padding:32px 28px;
+  border-right:2px solid var(--ink);
+  position:relative;
+  min-height:340px;
+}
+.triad-card:last-child{border-right:none}
+
+.triad-card .label{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  margin-bottom:6px;
+  display:inline-block;
+  padding:3px 8px;
+  color:var(--paper);
+}
+.triad-card.own .label{background:var(--accent-own)}
+.triad-card.cust .label{background:var(--accent-cust)}
+.triad-card.poss .label{background:var(--accent-poss);color:var(--ink)}
+
+.triad-card .en{
+  font-family:'Fraunces',serif;
+  font-weight:800;
+  font-size:38px;
+  line-height:1;
+  margin:18px 0 4px;
+  letter-spacing:-0.02em;
+}
+.triad-card .fr{
+  font-family:'Fraunces',serif;
+  font-style:italic;
+  font-size:18px;
+  color:var(--muted);
+  margin-bottom:24px;
+}
+
+.triad-card .nature{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  padding:6px 0;
+  border-top:1px solid var(--ink);
+  border-bottom:1px solid var(--ink);
+  margin-bottom:20px;
+  text-align:center;
+}
+
+.triad-card .desc{
+  font-size:14px;
+  line-height:1.55;
+  margin-bottom:16px;
+}
+
+.triad-card .quote{
+  font-family:'Fraunces',serif;
+  font-style:italic;
+  font-size:15px;
+  line-height:1.4;
+  padding:12px;
+  background:rgba(0,0,0,0.04);
+  border-left:3px solid;
+}
+.triad-card.own .quote{border-color:var(--accent-own)}
+.triad-card.cust .quote{border-color:var(--accent-cust)}
+.triad-card.poss .quote{border-color:var(--accent-poss)}
+
+.triad-card .icon{
+  position:absolute;
+  top:24px;
+  right:24px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:38px;
+  font-weight:700;
+  opacity:0.15;
+}
+
+/* SCHEMA 2 : MATRICE DES CAS */
+.matrix-wrap{margin-bottom:80px}
+
+.matrix{
+  width:100%;
+  border-collapse:collapse;
+  border:2px solid var(--ink);
+  background:var(--paper);
+  font-size:14px;
+}
+.matrix th{
+  background:var(--ink);
+  color:var(--paper);
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  padding:14px 16px;
+  text-align:left;
+  font-weight:500;
+}
+.matrix th.col-own{background:var(--accent-own)}
+.matrix th.col-cust{background:var(--accent-cust)}
+.matrix th.col-poss{background:var(--accent-poss);color:var(--ink)}
+
+.matrix td{
+  padding:16px;
+  border-top:1px solid var(--ink);
+  vertical-align:middle;
+}
+.matrix tr:nth-child(even) td{background:rgba(0,0,0,0.025)}
+.matrix .case-name{
+  font-family:'Fraunces',serif;
+  font-weight:600;
+  font-size:15px;
+}
+.matrix .case-sub{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:2px;
+  font-style:italic;
+}
+.cell-actor{
+  font-family:'JetBrains Mono',monospace;
+  font-size:12px;
+  letter-spacing:0.5px;
+}
+.cell-actor.same{font-weight:700}
+.cell-actor.different{color:var(--muted)}
+.cell-actor.danger{color:var(--accent-own);font-weight:700}
+
+.dot{
+  display:inline-block;
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  margin-right:8px;
+  vertical-align:middle;
+}
+.dot-own{background:var(--accent-own)}
+.dot-cust{background:var(--accent-cust)}
+.dot-poss{background:var(--accent-poss)}
+
+/* SCHEMA 3 : FLUX */
+.flow{
+  background:var(--ink);
+  color:var(--paper);
+  padding:48px 32px;
+  margin-bottom:80px;
+  position:relative;
+  overflow:hidden;
+}
+.flow::before{
+  content:'XRPL';
+  position:absolute;
+  top:-30px;
+  right:-20px;
+  font-family:'Fraunces',serif;
+  font-weight:900;
+  font-size:280px;
+  line-height:1;
+  opacity:0.04;
+  letter-spacing:-0.08em;
+}
+
+.flow .flow-title{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  color:var(--paper);
+  border-bottom:1px solid var(--paper);
+  padding-bottom:8px;
+  margin-bottom:32px;
+}
+
+.flow-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:24px;
+  position:relative;
+  z-index:1;
+}
+
+.flow-layer{
+  border:1px solid var(--paper);
+  padding:24px 20px;
+  background:rgba(244,240,232,0.04);
+}
+.flow-layer .layer-num{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  letter-spacing:2px;
+  opacity:0.6;
+  margin-bottom:8px;
+}
+.flow-layer .layer-name{
+  font-family:'Fraunces',serif;
+  font-weight:800;
+  font-size:26px;
+  margin-bottom:4px;
+}
+.flow-layer .layer-where{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  letter-spacing:1px;
+  opacity:0.7;
+  margin-bottom:18px;
+  padding-bottom:14px;
+  border-bottom:1px dashed var(--paper);
+}
+.flow-layer .layer-what{
+  font-size:13px;
+  line-height:1.55;
+  margin-bottom:12px;
+}
+.flow-layer .layer-tx{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  letter-spacing:0.5px;
+  padding:8px 10px;
+  background:rgba(244,240,232,0.1);
+  border-left:2px solid;
+}
+.flow-layer.l-own .layer-name{color:#ff6b5e}
+.flow-layer.l-own .layer-tx{border-color:#ff6b5e}
+.flow-layer.l-cust .layer-name{color:#6fa8e8}
+.flow-layer.l-cust .layer-tx{border-color:#6fa8e8}
+.flow-layer.l-poss .layer-name{color:#f4c84a}
+.flow-layer.l-poss .layer-tx{border-color:#f4c84a}
+
+/* SCHEMA 4 : ALERTE DÉSALIGNEMENT */
+.alignment{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:24px;
+  margin-bottom:80px;
+}
+.align-card{
+  border:2px solid var(--ink);
+  padding:28px;
+  background:var(--paper);
+  position:relative;
+}
+.align-card.good{border-color:#2d6e3e}
+.align-card.bad{border-color:var(--accent-own)}
+
+.align-card .status{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  padding:4px 10px;
+  display:inline-block;
+  margin-bottom:18px;
+  color:var(--paper);
+}
+.align-card.good .status{background:#2d6e3e}
+.align-card.bad .status{background:var(--accent-own)}
+
+.align-card h3{
+  font-family:'Fraunces',serif;
+  font-weight:800;
+  font-size:24px;
+  line-height:1.1;
+  margin-bottom:16px;
+  letter-spacing:-0.01em;
+}
+
+.align-card .scenario{
+  font-size:14px;
+  line-height:1.6;
+  margin-bottom:18px;
+}
+
+.align-line{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:12px;
+  padding:8px 0;
+  border-bottom:1px dotted rgba(0,0,0,0.2);
+}
+.align-line:last-child{border-bottom:none}
+.align-line .who{
+  flex:1;
+  letter-spacing:0.5px;
+}
+.align-line .arrow{
+  font-family:'Fraunces',serif;
+  font-style:italic;
+  color:var(--muted);
+}
+
+/* SCHEMA 0 : BIEN VS REPRESENTATION */
+.dual{
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  gap:0;
+  margin-bottom:32px;
+  border:2px solid var(--ink);
+  background:var(--paper);
+  align-items:stretch;
+}
+.dual-side{
+  padding:32px 28px;
+  display:flex;
+  flex-direction:column;
+}
+.dual-real{background:rgba(45,110,62,0.05)}
+.dual-digital{background:rgba(26,77,143,0.05)}
+
+.dual-label{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  padding:4px 10px;
+  display:inline-block;
+  align-self:flex-start;
+  color:var(--paper);
+  margin-bottom:14px;
+}
+.dual-real .dual-label{background:#2d6e3e}
+.dual-digital .dual-label{background:var(--accent-cust)}
+
+.dual-icon{
+  font-size:48px;
+  line-height:1;
+  margin-bottom:12px;
+  font-family:'Fraunces',serif;
+}
+.dual-real .dual-icon{color:#2d6e3e}
+.dual-digital .dual-icon{color:var(--accent-cust)}
+
+.dual-side h4{
+  font-family:'Fraunces',serif;
+  font-weight:800;
+  font-size:30px;
+  line-height:1;
+  letter-spacing:-0.02em;
+  margin-bottom:12px;
+}
+.dual-side > p{
+  font-size:14px;
+  line-height:1.5;
+  margin-bottom:18px;
+  color:var(--ink);
+}
+.dual-side > p em{font-style:italic;font-weight:600}
+
+.dual-ex{
+  border-top:1px dashed var(--ink);
+  padding-top:14px;
+  margin-bottom:18px;
+  flex:1;
+}
+.ex-row{
+  font-family:'JetBrains Mono',monospace;
+  font-size:12px;
+  padding:4px 0 4px 14px;
+  position:relative;
+  letter-spacing:0.3px;
+}
+.ex-row::before{
+  content:'·';
+  position:absolute;
+  left:4px;
+  font-weight:700;
+}
+
+.dual-rules{
+  border-top:1px solid var(--ink);
+  padding-top:10px;
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+.dr-label{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+.dr-val{
+  font-family:'Fraunces',serif;
+  font-weight:600;
+  font-size:15px;
+  font-style:italic;
+}
+
+/* PONT */
+.dual-bridge{
+  background:var(--ink);
+  color:var(--paper);
+  padding:32px 24px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  min-width:200px;
+}
+.bridge-content{text-align:center}
+.bridge-label{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  margin-bottom:6px;
+  opacity:0.6;
+}
+.bridge-desc{
+  font-family:'Fraunces',serif;
+  font-weight:600;
+  font-size:14px;
+  font-style:italic;
+  margin-bottom:14px;
+}
+.bridge-arrow{
+  font-size:52px;
+  line-height:1;
+  color:var(--accent-poss);
+  margin-bottom:14px;
+}
+.bridge-warn{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  letter-spacing:1px;
+  line-height:1.4;
+  color:#f4c84a;
+  max-width:160px;
+  margin:0 auto;
+}
+
+/* TROIS CAS */
+.dual-cases{margin-bottom:32px}
+.dc-title{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin-bottom:14px;
+}
+.dc-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:0;
+  border:2px solid var(--ink);
+}
+.dc-card{
+  padding:22px 20px;
+  border-right:2px solid var(--ink);
+}
+.dc-card:last-child{border-right:none}
+.dc-1{background:rgba(45,110,62,0.06)}
+.dc-2{background:rgba(212,160,23,0.08)}
+.dc-3{background:rgba(200,57,46,0.06)}
+
+.dc-num{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin-bottom:6px;
+}
+.dc-card h5{
+  font-family:'Fraunces',serif;
+  font-weight:800;
+  font-size:20px;
+  line-height:1.1;
+  letter-spacing:-0.01em;
+  margin-bottom:10px;
+}
+.dc-card h5 em{font-style:italic}
+.dc-1 h5 em{color:#2d6e3e}
+.dc-2 h5 em{color:var(--accent-poss)}
+.dc-3 h5 em{color:var(--accent-own)}
+.dc-card p{
+  font-size:13px;
+  line-height:1.5;
+  margin-bottom:12px;
+}
+.dc-ex{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  color:var(--muted);
+  font-style:italic;
+  letter-spacing:0.3px;
+}
+
+/* QUESTION */
+.dual-question{
+  border:2px solid var(--ink);
+  padding:28px 32px;
+  margin-bottom:32px;
+  background:var(--paper);
+}
+.dq-label{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin-bottom:10px;
+}
+.dq-text{
+  font-family:'Fraunces',serif;
+  font-weight:700;
+  font-style:italic;
+  font-size:24px;
+  line-height:1.2;
+  letter-spacing:-0.01em;
+  margin-bottom:20px;
+  padding-bottom:18px;
+  border-bottom:1px solid var(--ink);
+}
+.dq-text strong{text-decoration:underline;text-decoration-color:var(--accent-own);text-underline-offset:4px;text-decoration-thickness:2px}
+.dq-grid{display:flex;flex-direction:column;gap:8px}
+.dq-row{
+  display:grid;
+  grid-template-columns:200px auto 1fr;
+  gap:14px;
+  align-items:center;
+  padding:8px 0;
+  border-bottom:1px dotted rgba(0,0,0,0.15);
+}
+.dq-row:last-child{border-bottom:none}
+.dq-asset{
+  font-family:'JetBrains Mono',monospace;
+  font-size:12px;
+  letter-spacing:0.5px;
+  font-weight:500;
+}
+.dq-arr{
+  font-family:'Fraunces',serif;
+  font-style:italic;
+  color:var(--muted);
+}
+.dq-result{
+  font-size:14px;
+  line-height:1.4;
+}
+.dq-bad .dq-asset{color:var(--accent-own);font-weight:700}
+
+.dual-footnote{
+  border-left:6px solid var(--accent-poss);
+  background:rgba(212,160,23,0.08);
+  padding:22px 28px;
+  margin-bottom:80px;
+  font-size:14.5px;
+  line-height:1.6;
+}
+.dual-footnote strong{font-family:'Fraunces',serif;font-weight:800}
+.dual-footnote em{font-style:italic}
+
+/* METAPHORE - compléments */
+.meta-extra{
+  margin-top:32px;
+  border-top:1px dashed var(--ink);
+  padding-top:28px;
+}
+.me-title{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin-bottom:18px;
+  text-align:center;
+}
+.me-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+}
+.me-card{
+  border:1px solid var(--ink);
+  padding:22px 24px;
+  background:rgba(0,0,0,0.02);
+}
+.me-card h4{
+  font-family:'Fraunces',serif;
+  font-weight:800;
+  font-size:24px;
+  line-height:1.05;
+  letter-spacing:-0.01em;
+  margin-bottom:6px;
+}
+.me-intro{
+  font-family:'Fraunces',serif;
+  font-style:italic;
+  font-size:14px;
+  color:var(--muted);
+  margin-bottom:14px;
+  line-height:1.4;
+}
+.me-list{
+  list-style:none;
+  padding:0;
+}
+.me-list li{
+  font-size:13.5px;
+  line-height:1.5;
+  padding:6px 0;
+  border-bottom:1px dotted rgba(0,0,0,0.12);
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+}
+.me-list li:last-child{border-bottom:none}
+.me-list li strong{font-weight:700}
+.me-dot{
+  display:inline-block;
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  margin-top:6px;
+  flex-shrink:0;
+}
+.me-dot.d-own{background:var(--accent-own)}
+.me-dot.d-cust{background:var(--accent-cust)}
+.me-dot.d-poss{background:var(--accent-poss)}
+
+/* TAKEAWAY - compléments */
+.ta-extra{
+  margin-top:36px;
+  padding-top:28px;
+  border-top:1px dashed rgba(244,240,232,0.3);
+}
+.ta-extra-title{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:rgba(244,240,232,0.6);
+  margin-bottom:20px;
+}
+.ta-variant{
+  padding:20px 24px;
+  margin-bottom:18px;
+  background:rgba(244,240,232,0.06);
+  border-left:3px solid;
+}
+.ta-variant:last-child{margin-bottom:0}
+.ta-variant.ta-aware{border-left-color:#6fa8e8}
+.ta-variant.ta-advanced{border-left-color:#ff6b5e}
+.ta-variant h3{
+  font-family:'Fraunces',serif;
+  font-weight:800;
+  font-size:22px;
+  line-height:1.15;
+  letter-spacing:-0.01em;
+  margin:10px 0 12px;
+}
+.ta-variant h3 em{font-style:italic;color:#f4c84a}
+.ta-variant p{
+  font-size:14.5px;
+  line-height:1.55;
+  margin-bottom:10px;
+  max-width:none;
+}
+.ta-variant p:last-child{margin-bottom:0}
+.ta-variant .ta-sig{
+  font-family:'Fraunces',serif;
+  font-style:italic;
+  font-size:14px;
+  opacity:0.75;
+  padding-top:8px;
+  border-top:1px dotted rgba(244,240,232,0.2);
+}
+
+
+.hook{
+  margin-bottom:64px;
+  border:2px solid var(--ink);
+  background:rgba(212,160,23,0.06);
+  padding:36px 40px;
+  position:relative;
+}
+.hook::before{
+  content:'?';
+  position:absolute;
+  top:-10px;
+  right:24px;
+  font-family:'Fraunces',serif;
+  font-weight:900;
+  font-size:140px;
+  line-height:1;
+  color:var(--accent-poss);
+  opacity:0.25;
+}
+.hook-q{
+  font-family:'Fraunces',serif;
+  font-weight:800;
+  font-style:italic;
+  font-size:clamp(28px,3.5vw,42px);
+  line-height:1.1;
+  letter-spacing:-0.02em;
+  margin-bottom:14px;
+  position:relative;
+  z-index:1;
+}
+.hook-q em{font-style:italic;text-decoration:underline;text-decoration-color:var(--accent-own);text-underline-offset:4px;text-decoration-thickness:3px}
+.hook-sub{
+  font-family:'JetBrains Mono',monospace;
+  font-size:12px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--muted);
+  position:relative;
+  z-index:1;
+}
+
+/* METAPHORE */
+.metaphor-block{margin-bottom:80px}
+.meta-grid{
+  display:grid;
+  grid-template-columns:1fr 1.4fr;
+  gap:48px;
+  border:2px solid var(--ink);
+  padding:36px 40px;
+  background:var(--paper);
+  align-items:start;
+}
+.meta-left h3{
+  font-family:'Fraunces',serif;
+  font-weight:800;
+  font-size:clamp(28px,3.5vw,42px);
+  line-height:1;
+  letter-spacing:-0.02em;
+  margin-bottom:18px;
+}
+.meta-intro{
+  font-family:'Fraunces',serif;
+  font-style:italic;
+  font-size:17px;
+  line-height:1.4;
+  color:var(--muted);
+}
+.meta-block{
+  border-left:4px solid var(--ink);
+  padding:4px 0 4px 22px;
+  margin-bottom:22px;
+}
+.meta-block:last-child{margin-bottom:0}
+.meta-block.m-own{border-color:var(--accent-own)}
+.meta-block.m-cust{border-color:var(--accent-cust)}
+.meta-block.m-poss{border-color:var(--accent-poss)}
+.meta-block strong{
+  font-family:'Fraunces',serif;
+  font-weight:800;
+  font-size:19px;
+  display:block;
+  margin-bottom:4px;
+  letter-spacing:-0.01em;
+}
+.meta-block p{font-size:14px;line-height:1.55;color:var(--ink)}
+.meta-block .ex{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  color:var(--muted);
+  margin-top:6px;
+  letter-spacing:0.3px;
+  font-style:normal;
+}
+
+/* SCHEMA 5 : PRIMITIVES */
+.primitives{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:2px;
+  background:var(--ink);
+  border:2px solid var(--ink);
+  margin-bottom:32px;
+}
+.prim-card{
+  background:var(--paper);
+  padding:24px 22px;
+  position:relative;
+  display:flex;
+  flex-direction:column;
+}
+.prim-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:14px;
+}
+.prim-num{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:1px;
+  color:var(--muted);
+}
+.prim-tag{
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  padding:3px 8px;
+  font-weight:500;
+}
+.tag-issue{background:#2d6e3e;color:var(--paper)}
+.tag-id{background:var(--accent-cust);color:var(--paper)}
+.tag-control{background:var(--accent-own);color:var(--paper)}
+
+.prim-card h4{
+  font-family:'Fraunces',serif;
+  font-weight:800;
+  font-size:22px;
+  line-height:1.1;
+  letter-spacing:-0.01em;
+  margin-bottom:10px;
+}
+.prim-desc{
+  font-size:13.5px;
+  line-height:1.5;
+  color:var(--ink);
+  margin-bottom:16px;
+  flex:1;
+}
+.prim-aligns{
+  border-top:1px dashed var(--ink);
+  padding-top:10px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.aligns-label{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin-right:4px;
+}
+
+.prim-note{
+  border:2px solid var(--ink);
+  padding:24px 28px;
+  background:rgba(212,160,23,0.08);
+  font-size:14.5px;
+  line-height:1.6;
+  margin-bottom:80px;
+  border-left-width:6px;
+  border-left-color:var(--accent-poss);
+}
+.prim-note strong{font-family:'Fraunces',serif;font-weight:800}
+
+/* SCHEMA 6 : REGUL */
+.regul-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:0;
+  border:2px solid var(--ink);
+  margin-bottom:80px;
+}
+.regul-card{
+  border-right:2px solid var(--ink);
+  display:flex;
+  flex-direction:column;
+}
+.regul-card:last-child{border-right:none}
+.regul-head{
+  padding:24px 22px;
+  border-bottom:2px solid var(--ink);
+  background:rgba(0,0,0,0.04);
+}
+.regul-head .dot{width:12px;height:12px;margin-bottom:10px;display:block}
+.regul-head h4{
+  font-family:'Fraunces',serif;
+  font-weight:800;
+  font-size:30px;
+  line-height:1;
+  margin-bottom:8px;
+  letter-spacing:-0.01em;
+}
+.weight{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  padding:4px 10px;
+  display:inline-block;
+}
+.w-medium{background:#d4a017;color:var(--ink)}
+.w-heavy{background:var(--accent-own);color:var(--paper)}
+.w-indirect{background:#4a4a4a;color:var(--paper)}
+
+.regul-body{padding:20px 22px;flex:1}
+.regul-section{margin-bottom:18px}
+.regul-section:last-child{margin-bottom:0}
+.rs-title{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin-bottom:8px;
+  padding-bottom:4px;
+  border-bottom:1px dotted var(--muted);
+}
+.regul-section ul{
+  list-style:none;
+  padding:0;
+}
+.regul-section li{
+  font-size:13px;
+  line-height:1.5;
+  padding:3px 0 3px 14px;
+  position:relative;
+}
+.regul-section li::before{
+  content:'·';
+  position:absolute;
+  left:4px;
+  font-weight:700;
+  color:var(--ink);
+}
+.regul-section li strong{font-weight:700}
+
+/* SCHEMA 7 : TREE */
+.tree{margin-bottom:60px}
+.tree-q{
+  border:2px solid var(--ink);
+  background:var(--paper);
+  padding:24px 28px;
+  margin-bottom:20px;
+  position:relative;
+}
+.tree-q.tree-start{border-color:var(--ink);border-width:3px}
+.q-label{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin-bottom:8px;
+}
+.q-text{
+  font-family:'Fraunces',serif;
+  font-weight:600;
+  font-size:20px;
+  line-height:1.3;
+  margin-bottom:18px;
+  letter-spacing:-0.01em;
+}
+.q-branches{display:flex;flex-direction:column;gap:16px}
+.branch{display:flex;align-items:stretch;gap:14px}
+.branch-no{padding-left:0;align-items:center}
+.b-arrow{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:1.5px;
+  padding:6px 12px;
+  background:var(--ink);
+  color:var(--paper);
+  flex-shrink:0;
+  align-self:flex-start;
+}
+.branch-no .b-arrow{background:transparent;color:var(--muted);padding:4px 0}
+
+.b-result{
+  flex:1;
+  border:2px solid var(--ink);
+  padding:18px 20px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px 24px;
+  align-items:start;
+}
+.b-result.r-security{border-left:6px solid #6b2c91;background:rgba(107,44,145,0.04)}
+.b-result.r-emt{border-left:6px solid var(--accent-own);background:rgba(200,57,46,0.04)}
+.b-result.r-art{border-left:6px solid #d4691a;background:rgba(212,105,26,0.04)}
+.b-result.r-utility{border-left:6px solid var(--accent-cust);background:rgba(26,77,143,0.04)}
+.b-result.r-other{border-left:6px solid #2d6e3e;background:rgba(45,110,62,0.04)}
+
+.r-label{
+  font-family:'Fraunces',serif;
+  font-weight:800;
+  font-size:18px;
+  letter-spacing:-0.01em;
+  grid-column:1;
+}
+.r-desc{
+  font-size:13px;
+  line-height:1.5;
+  grid-column:1;
+}
+.r-burden{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  grid-column:2;
+  grid-row:1;
+}
+.r-burden strong{font-weight:700}
+.r-ex{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  color:var(--muted);
+  font-style:italic;
+  grid-column:2;
+  grid-row:2;
+  letter-spacing:0.3px;
+}
+
+.tree-footnote{
+  margin-top:24px;
+  padding:20px 24px;
+  background:rgba(212,160,23,0.08);
+  border-left:6px solid var(--accent-poss);
+  font-size:13.5px;
+  line-height:1.6;
+}
+.tree-footnote strong{font-family:'Fraunces',serif;font-weight:800}
+
+/* TAKEAWAY */
+.takeaway{
+  border:3px solid var(--ink);
+  padding:40px 36px;
+  background:var(--ink);
+  color:var(--paper);
+  position:relative;
+}
+.takeaway .ta-label{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  margin-bottom:18px;
+  opacity:0.6;
+}
+.takeaway h2{
+  font-family:'Fraunces',serif;
+  font-weight:800;
+  font-size:36px;
+  line-height:1.1;
+  letter-spacing:-0.02em;
+  margin-bottom:20px;
+}
+.takeaway h2 em{
+  font-style:italic;
+  color:#f4c84a;
+}
+.takeaway p{
+  font-size:16px;
+  line-height:1.6;
+  max-width:780px;
+  margin-bottom:14px;
+}
+
+/* FOOTER */
+.footer{
+  margin-top:60px;
+  padding-top:18px;
+  border-top:1px solid var(--ink);
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  color:var(--muted);
+  display:flex;
+  justify-content:space-between;
+}
+
+/* RESPONSIVE */
+@media (max-width: 860px){
+  .triad{grid-template-columns:1fr}
+  .triad-card{border-right:none;border-bottom:2px solid var(--ink)}
+  .triad-card:last-child{border-bottom:none}
+  .flow-grid{grid-template-columns:1fr}
+  .alignment{grid-template-columns:1fr}
+  .matrix{font-size:12px}
+  .matrix th,.matrix td{padding:10px 8px}
+  h1{font-size:44px}
+  .primitives{grid-template-columns:1fr}
+  .regul-grid{grid-template-columns:1fr}
+  .regul-card{border-right:none;border-bottom:2px solid var(--ink)}
+  .regul-card:last-child{border-bottom:none}
+  .b-result{grid-template-columns:1fr;gap:8px}
+  .r-burden,.r-ex{grid-column:1;grid-row:auto}
+  .branch{flex-direction:column}
+  .meta-grid{grid-template-columns:1fr;gap:24px;padding:24px}
+  .hook{padding:24px 20px}
+  .hook::before{font-size:90px;right:10px}
+  .me-grid{grid-template-columns:1fr}
+  .dual{grid-template-columns:1fr}
+  .dual-bridge{padding:20px;min-width:auto}
+  .bridge-arrow{font-size:36px;transform:rotate(90deg)}
+  .dc-grid{grid-template-columns:1fr}
+  .dc-card{border-right:none;border-bottom:2px solid var(--ink)}
+  .dc-card:last-child{border-bottom:none}
+  .dq-row{grid-template-columns:1fr;gap:4px}
+  .dq-arr{display:none}
+}
+</style>
+
+<style>
+/* LANGUAGE TOGGLE */
+.lang-toggle{
+  position:fixed;
+  top:16px;
+  right:16px;
+  z-index:200;
+  background:var(--ink);
+  color:var(--paper);
+  border:1px solid var(--ink);
+  display:flex;
+  gap:0;
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  font-weight:500;
+  box-shadow:0 2px 8px rgba(0,0,0,0.15);
+}
+.lang-toggle button{
+  background:transparent;
+  color:var(--paper);
+  border:none;
+  padding:8px 14px;
+  cursor:pointer;
+  transition:all 0.15s;
+  font-family:inherit;
+  font-size:inherit;
+  letter-spacing:inherit;
+  text-transform:inherit;
+  font-weight:inherit;
+}
+.lang-toggle button:hover{background:rgba(244,240,232,0.15)}
+.lang-toggle button.active{
+  background:var(--paper);
+  color:var(--ink);
+  font-weight:700;
+}
+
+/* Show/hide language blocks */
+[data-lang]{display:none}
+html[lang="fr"] [data-lang="fr"]{display:block}
+html[lang="en"] [data-lang="en"]{display:block}
+
+@media (max-width: 860px){
+  .lang-toggle{top:10px;right:10px;font-size:10px}
+  .lang-toggle button{padding:6px 10px}
+}
+</style>
+</head>
+<body>
+
+<div class="lang-toggle">
+  <button id="btn-fr" class="active" onclick="setLang('fr')">FR</button>
+  <button id="btn-en" onclick="setLang('en')">EN</button>
+</div>
+
+<div data-lang="fr">
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <span class="kicker">XRPL · Pédagogie entrepreneur</span>
+    <span class="edition">Fiche 01 / La triade</span>
+  </div>
+
+  <h1>
+    <span class="word-own">Ownership</span><span class="sep"> · </span><span class="word-cust">Custody</span><span class="sep"> · </span><span class="word-poss">Possession</span>
+  </h1>
+  <p class="dek">
+    Avant de parler de propriété ou de garde, il faut poser une distinction plus fondamentale : <strong>le bien</strong> et sa <strong>représentation numérique</strong> ne sont pas la même chose. Toute la pédagogie XRPL repose là-dessus.
+  </p>
+
+  <!-- ACCROCHE -->
+  <div class="hook">
+    <div class="hook-inner">
+      <div class="hook-q">« Mes cryptos sont sur Coinbase. Elles m'appartiennent, non&nbsp;? »</div>
+      <div class="hook-sub">Spoiler : oui et non. Et cette nuance change tout.</div>
+    </div>
+    <div class="lvl-more">
+      <div class="lvl-item lvl-aware">
+        <span class="lvl-tag">Variante · Sensibilisé</span>
+        <div style="font-family:'Fraunces',serif;font-style:italic;font-weight:700;font-size:20px;line-height:1.2;margin-bottom:6px">« Not your keys, not your coins. » Vraiment&nbsp;?</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)">Le slogan célèbre cache une vérité plus nuancée.</div>
+      </div>
+      <div class="lvl-item lvl-advanced">
+        <span class="lvl-tag">Variante · Initié</span>
+        <div style="font-family:'Fraunces',serif;font-style:italic;font-weight:700;font-size:20px;line-height:1.2;margin-bottom:6px">Sur XRPL, transférer un token, ce n'est <em>pas</em> transférer la propriété.</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)">Comprendre la différence pour designer un produit conforme.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCHEMA 0 : BIEN VS REPRESENTATION -->
+  <div class="section-title">
+    <span><span class="num">00</span> &nbsp; La distinction fondatrice</span>
+    <span>Avant tout le reste</span>
+  </div>
+
+  <p style="font-size:15px;line-height:1.6;max-width:780px;margin-bottom:32px;color:var(--ink)">
+    Un token sur XRPL n'est pas le bien. C'est une <strong>représentation</strong> du bien. Ces deux objets sont distincts, reliés par un <strong>pont</strong> juridique ou contractuel. Comprendre cette dualité, c'est comprendre tout XRPL.
+  </p>
+
+  <div class="dual">
+
+    <div class="dual-side dual-real">
+      <div class="dual-label">Le bien</div>
+      <div class="dual-icon">◼</div>
+      <h4>L'actif réel</h4>
+      <p>Existe dans le monde physique ou juridique, indépendamment de toute blockchain.</p>
+      <div class="dual-ex">
+        <div class="ex-row">Un immeuble</div>
+        <div class="ex-row">Une créance commerciale</div>
+        <div class="ex-row">Une part de fonds</div>
+        <div class="ex-row">Un dollar dans une banque</div>
+        <div class="ex-row">Une œuvre d'art</div>
+      </div>
+      <div class="dual-rules">
+        <span class="dr-label">Régi par :</span>
+        <span class="dr-val">Le droit du monde réel</span>
+      </div>
+    </div>
+
+    <div class="dual-bridge">
+      <div class="bridge-line"></div>
+      <div class="bridge-content">
+        <div class="bridge-label">Le pont</div>
+        <div class="bridge-desc">Contrat, cadre légal, attestation</div>
+        <div class="bridge-arrow">⇄</div>
+        <div class="bridge-warn">Si ce pont casse, la représentation perd son sens.</div>
+      </div>
+    </div>
+
+    <div class="dual-side dual-digital">
+      <div class="dual-label">La représentation</div>
+      <div class="dual-icon">◇</div>
+      <h4>L'actif numérique</h4>
+      <p>Existe sur le ledger XRPL. Un token (IOU, MPT, NFT) qui <em>pointe</em> vers le bien.</p>
+      <div class="dual-ex">
+        <div class="ex-row">Un MPT immobilier</div>
+        <div class="ex-row">Un token de créance</div>
+        <div class="ex-row">Une part de fonds tokenisée</div>
+        <div class="ex-row">Un RLUSD</div>
+        <div class="ex-row">Un NFT certificat</div>
+      </div>
+      <div class="dual-rules">
+        <span class="dr-label">Régi par :</span>
+        <span class="dr-val">Le protocole XRPL</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="dual-cases">
+    <div class="dc-title">Trois cas qui éclairent la dualité</div>
+    <div class="dc-grid">
+
+      <div class="dc-card dc-1">
+        <div class="dc-num">Cas 1</div>
+        <h5>Représentation <em>=</em> bien</h5>
+        <p>Pas de pont. Le token <em>est</em> l'actif. Pas de dualité.</p>
+        <div class="dc-ex">Ex : XRP, BTC, ETH (actifs natifs)</div>
+      </div>
+
+      <div class="dc-card dc-2">
+        <div class="dc-num">Cas 2</div>
+        <h5>Représentation <em>↔</em> bien</h5>
+        <p>Deux objets, un pont juridique solide. Le standard du tokenisé sérieux.</p>
+        <div class="dc-ex">Ex : RLUSD, RWA conformes, stablecoins régulés</div>
+      </div>
+
+      <div class="dc-card dc-3">
+        <div class="dc-num">Cas 3</div>
+        <h5>Représentation <em>sans</em> bien</h5>
+        <p>Le token prétend représenter ce qui n'existe pas (ou plus). Scam classique.</p>
+        <div class="dc-ex">Ex : tokens "adossés" à des actifs fictifs</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="dual-question">
+    <div class="dq-label">La question qui révèle la qualité du pont</div>
+    <div class="dq-text">« Que se passe-t-il pour l'actif <strong>si le ledger XRPL disparaît demain</strong> ? »</div>
+    <div class="dq-grid">
+      <div class="dq-row"><span class="dq-asset">Pour XRP / BTC</span><span class="dq-arr">→</span><span class="dq-result">L'actif disparaît avec. Token et bien sont la même chose.</span></div>
+      <div class="dq-row"><span class="dq-asset">Stablecoin bien conçu</span><span class="dq-arr">→</span><span class="dq-result">Le dollar en banque existe toujours. Un nouvel émetteur peut redistribuer.</span></div>
+      <div class="dq-row"><span class="dq-asset">RWA bien conçu</span><span class="dq-arr">→</span><span class="dq-result">L'immeuble existe toujours, le registre légal le confirme.</span></div>
+      <div class="dq-row dq-bad"><span class="dq-asset">Représentation mal conçue</span><span class="dq-arr">→</span><span class="dq-result">Tu as perdu l'actif. Le bien n'existait peut-être pas vraiment.</span></div>
+    </div>
+  </div>
+
+  <div class="dual-footnote">
+    <strong>La règle d'or à retenir.</strong> La triade <em>Ownership · Custody · Possession</em> qu'on va découvrir s'applique à la <strong>représentation</strong> (le token). Le <strong>bien lui-même</strong> obéit au droit qui le régit dans le monde réel. Tout le travail de design d'un produit XRPL consiste à <strong>construire et maintenir le pont</strong> entre les deux.
+  </div>
+
+  <!-- SCHEMA 1 : LES TROIS CONCEPTS -->
+  <div class="section-title">
+    <span><span class="num">01</span> &nbsp; Définitions cardinales</span>
+    <span>Le droit · Le mandat · Le fait</span>
+  </div>
+
+  <p style="font-size:14px;line-height:1.6;max-width:780px;margin-bottom:24px;color:var(--muted);font-family:'Fraunces',serif;font-style:italic;border-left:3px solid var(--accent-poss);padding-left:18px">
+    Rappel : ces trois concepts s'appliquent à la <strong style="font-style:normal">représentation numérique</strong> (l'objet manipulé sur XRPL — la <em>property</em> au sens "ce qui est possédé"), pas au bien réel sous-jacent.
+  </p>
+
+  <div class="triad">
+    <div class="triad-card own">
+      <div class="icon">§</div>
+      <span class="label">Le droit</span>
+      <div class="en">Ownership</div>
+      <div class="fr">Propriété</div>
+      <div class="nature">Reconnue par la loi</div>
+      <p class="desc">Le titre <strong>juridique</strong> sur l'actif. Reconnu par un tribunal, opposable aux tiers, transmissible par héritage.</p>
+      <p class="quote">« Cet actif m'appartient au regard de la loi. »</p>
+    </div>
+
+    <div class="triad-card cust">
+      <div class="icon">⌘</div>
+      <span class="label">Le mandat</span>
+      <div class="en">Custody</div>
+      <div class="fr">Garde</div>
+      <div class="nature">Responsabilité contractuelle</div>
+      <p class="desc">La <strong>responsabilité</strong> formalisée de garder et protéger l'actif pour le compte d'autrui. Un rôle, pas un fait.</p>
+      <p class="quote">« Je suis en charge de protéger cet actif. »</p>
+    </div>
+
+    <div class="triad-card poss">
+      <div class="icon">◉</div>
+      <span class="label">Le fait</span>
+      <div class="en">Possession</div>
+      <div class="fr">Détention</div>
+      <div class="nature">Contrôle effectif, ici et maintenant</div>
+      <p class="desc">Le contrôle <strong>matériel</strong>. Sur XRPL : qui détient les clés privées <em>à l'instant T</em>. Aucune dimension juridique.</p>
+      <p class="quote">« Je peux bouger cet actif, là, maintenant. »</p>
+    </div>
+  </div>
+
+  <!-- SCHEMA INTERMEDIAIRE : METAPHORE -->
+  <div class="section-title">
+    <span><span class="num">01·5</span> &nbsp; Une métaphore pour ancrer</span>
+    <span>Trois angles, du plus simple au plus technique</span>
+  </div>
+
+  <div class="metaphor-block">
+
+    <!-- Métaphore principale : la voiture -->
+    <div class="meta-grid">
+      <div class="meta-left">
+        <h3>La métaphore de la voiture</h3>
+        <p class="meta-intro">Trois personnes peuvent avoir un lien avec une voiture, sans avoir le même type de lien.</p>
+      </div>
+      <div class="meta-right">
+        <div class="meta-block m-own">
+          <strong>Ownership — La carte grise</strong>
+          <p>Le titulaire légal du véhicule. Le propriétaire selon l'État.</p>
+          <p class="ex">Ex : ton nom sur la carte grise</p>
+        </div>
+        <div class="meta-block m-cust">
+          <strong>Custody — Le garage / le concessionnaire</strong>
+          <p>Celui qui en a la charge officielle, par contrat.</p>
+          <p class="ex">Ex : le concessionnaire pendant la révision</p>
+        </div>
+        <div class="meta-block m-poss">
+          <strong>Possession — Les clés en main</strong>
+          <p>Celui qui peut démarrer et rouler, là, maintenant.</p>
+          <p class="ex">Ex : le voiturier, ou un voleur</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Compléments : 2 autres angles, plus compacts -->
+    <div class="meta-extra">
+      <div class="me-title">Deux autres angles, pour aller plus loin</div>
+
+      <div class="me-grid">
+
+        <div class="me-card">
+          <span class="lvl-tag" style="background:var(--accent-cust);margin-bottom:10px">Pour qui connaît la finance</span>
+          <h4>La métaphore du compte titres</h4>
+          <p class="me-intro">Même structure qu'en finance traditionnelle.</p>
+          <ul class="me-list">
+            <li><span class="me-dot d-own"></span><strong>Ownership</strong> — L'investisseur (toi sur ton PEA)</li>
+            <li><span class="me-dot d-cust"></span><strong>Custody</strong> — Le teneur de compte-conservateur (BNP Paribas Securities Services)</li>
+            <li><span class="me-dot d-poss"></span><strong>Possession</strong> — L'opérateur qui exécute (custodian ; ou un attaquant en cas d'intrusion)</li>
+          </ul>
+        </div>
+
+        <div class="me-card">
+          <span class="lvl-tag" style="background:var(--accent-own);margin-bottom:10px">Pour qui connaît la techno</span>
+          <h4>La triade en logique XRPL</h4>
+          <p class="me-intro">Trois couches qui s'empilent. La blockchain ne voit que la troisième.</p>
+          <ul class="me-list">
+            <li><span class="me-dot d-own"></span><strong>Ownership</strong> — Hors-chaîne. Droit applicable, source = tribunal</li>
+            <li><span class="me-dot d-cust"></span><strong>Custody</strong> — Semi-chaîne. Contrat + credentials</li>
+            <li><span class="me-dot d-poss"></span><strong>Possession</strong> — On-chain. Signature ed25519/secp256k1</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SCHEMA 2 : MATRICE -->
+  <div class="section-title">
+    <span><span class="num">02</span> &nbsp; Matrice des configurations</span>
+    <span>Qui détient quoi, vraiment ?</span>
+  </div>
+
+  <div class="matrix-wrap">
+    <table class="matrix">
+      <thead>
+        <tr>
+          <th style="background:var(--ink)">Configuration</th>
+          <th class="col-own"><span class="dot dot-own" style="background:#fff"></span>Ownership</th>
+          <th class="col-cust"><span class="dot dot-cust" style="background:#fff"></span>Custody</th>
+          <th class="col-poss"><span class="dot dot-poss" style="background:#000"></span>Possession</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <div class="case-name">Trésorerie startup en self-custody</div>
+            <div class="case-sub">Stablecoins payés par clients B2B</div>
+          </td>
+          <td class="cell-actor same">La société</td>
+          <td class="cell-actor same">La société</td>
+          <td class="cell-actor different">CEO + CFO (multisig)</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="case-name">Programme de fidélité tokenisé</div>
+            <div class="case-sub">Points clients émis par un retailer</div>
+          </td>
+          <td class="cell-actor same">Le client</td>
+          <td class="cell-actor different">L'app de la marque</td>
+          <td class="cell-actor different">L'app de la marque</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="case-name">Facture tokenisée (affacturage)</div>
+            <div class="case-sub">MPT représentant une créance B2B</div>
+          </td>
+          <td class="cell-actor same">L'investisseur-acheteur</td>
+          <td class="cell-actor different">Plateforme régulée (PSAN)</td>
+          <td class="cell-actor different">Plateforme régulée</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="case-name">SaaS facturé en stablecoin XRPL</div>
+            <div class="case-sub">Encaissement client international</div>
+          </td>
+          <td class="cell-actor same">L'éditeur SaaS</td>
+          <td class="cell-actor different">PSP crypto (ou wallet ops)</td>
+          <td class="cell-actor different">PSP crypto</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="case-name">Part de fonds tokenisée</div>
+            <div class="case-sub">Money market fund on-chain</div>
+          </td>
+          <td class="cell-actor same">L'investisseur</td>
+          <td class="cell-actor different">Custodian régulé</td>
+          <td class="cell-actor different">Custodian régulé</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="case-name">Compromission d'une clé ops</div>
+            <div class="case-sub">Phishing d'un dirigeant signataire</div>
+          </td>
+          <td class="cell-actor same">La société <em>(juridiquement)</em></td>
+          <td class="cell-actor different">— compromise —</td>
+          <td class="cell-actor danger">L'attaquant</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SCHEMA 3 : FLUX DE TRANSFERT -->
+  <div class="section-title">
+    <span><span class="num">03</span> &nbsp; Que transfère-t-on, exactement ?</span>
+    <span>Trois couches, trois transactions</span>
+  </div>
+
+  <div class="flow">
+    <div class="flow-title">Anatomie d'un transfert d'actif tokenisé</div>
+    <div class="flow-grid">
+
+      <div class="flow-layer l-own">
+        <div class="layer-num">— Couche 1 —</div>
+        <div class="layer-name">Ownership</div>
+        <div class="layer-where">Registre légal / contrat</div>
+        <div class="layer-what">La propriété juridique se transfère selon le droit applicable du pays.</div>
+        <div class="layer-tx">tx_legal = acte notarié<br>ou cession contractuelle</div>
+      </div>
+
+      <div class="flow-layer l-cust">
+        <div class="layer-num">— Couche 2 —</div>
+        <div class="layer-name">Custody</div>
+        <div class="layer-where">Mandat avec un custodian</div>
+        <div class="layer-what">La responsabilité de garde se transfère par contrat de dépositaire.</div>
+        <div class="layer-tx">tx_mandate = nouveau<br>contrat de custody</div>
+      </div>
+
+      <div class="flow-layer l-poss">
+        <div class="layer-num">— Couche 3 —</div>
+        <div class="layer-name">Possession</div>
+        <div class="layer-where">Le ledger XRPL</div>
+        <div class="layer-what">Le contrôle technique se transfère par une signature de transaction on-chain.</div>
+        <div class="layer-tx">tx_xrpl = Payment<br>ou OfferCreate signé</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SCHEMA 4 : ALIGNEMENT -->
+  <div class="section-title">
+    <span><span class="num">04</span> &nbsp; Alignement vs désalignement</span>
+    <span>La règle d'or du design</span>
+  </div>
+
+  <div class="alignment">
+    <div class="align-card good">
+      <span class="status">✓ Alignement sain</span>
+      <h3>Les trois couches sont synchronisées</h3>
+      <p class="scenario">Un investisseur achète une part de fonds tokenisée. Le custodian régulé reçoit le MPT sur XRPL, le KYC est validé, le titre juridique est enregistré au nom de l'investisseur.</p>
+      <div class="align-line"><span class="who"><span class="dot dot-own"></span>Ownership</span><span class="arrow">→</span><span class="who">Investisseur</span></div>
+      <div class="align-line"><span class="who"><span class="dot dot-cust"></span>Custody</span><span class="arrow">→</span><span class="who">Custodian régulé</span></div>
+      <div class="align-line"><span class="who"><span class="dot dot-poss"></span>Possession</span><span class="arrow">→</span><span class="who">Custodian (clés)</span></div>
+    </div>
+
+    <div class="align-card bad">
+      <span class="status">✗ Désalignement critique</span>
+      <h3>Le ledger et la loi divergent</h3>
+      <p class="scenario">Un token immobilier est volé. Sur le ledger XRPL, le hacker a la possession et peut le revendre. La loi reconnaît toujours le propriétaire d'origine. Conflit : la blockchain dit A, le tribunal dit B.</p>
+      <div class="align-line"><span class="who"><span class="dot dot-own"></span>Ownership</span><span class="arrow">→</span><span class="who">Victime (juridiquement)</span></div>
+      <div class="align-line"><span class="who"><span class="dot dot-cust"></span>Custody</span><span class="arrow">→</span><span class="who" style="color:var(--muted)">— vide —</span></div>
+      <div class="align-line"><span class="who"><span class="dot dot-poss"></span>Possession</span><span class="arrow">→</span><span class="who" style="color:var(--accent-own);font-weight:700">Hacker (factuel)</span></div>
+    </div>
+  </div>
+
+  <!-- SCHEMA 5 : PRIMITIVES XRPL D'ALIGNEMENT -->
+  <div class="section-title">
+    <span><span class="num">05</span> &nbsp; La boîte à outils XRPL</span>
+    <span>Les primitives qui maintiennent l'alignement</span>
+  </div>
+
+  <p style="font-size:15px;line-height:1.6;max-width:780px;margin-bottom:32px;color:var(--ink)">
+    XRPL fournit des fonctionnalités natives — pas des smart contracts à coder, mais des primitives intégrées au protocole — qui permettent à un émetteur régulé de <strong>maintenir l'alignement</strong> entre possession on-chain et ownership juridique. Voici les six leviers à connaître.
+  </p>
+
+  <div class="primitives">
+
+    <div class="prim-card">
+      <div class="prim-head">
+        <span class="prim-num">01</span>
+        <span class="prim-tag tag-issue">Émission</span>
+      </div>
+      <h4>Trustlines</h4>
+      <p class="prim-desc">Le détenteur doit <strong>explicitement accepter</strong> chaque type de token. L'émetteur connaît tous ses porteurs.</p>
+      <div class="prim-aligns">
+        <span class="aligns-label">Aligne :</span>
+        <span class="dot dot-own"></span><span class="dot dot-poss"></span>
+      </div>
+    </div>
+
+    <div class="prim-card">
+      <div class="prim-head">
+        <span class="prim-num">02</span>
+        <span class="prim-tag tag-id">Identité</span>
+      </div>
+      <h4>Credentials</h4>
+      <p class="prim-desc">Attestations on-chain (KYC, accréditation, majorité) émises par une autorité. Vérifiables sans révéler la donnée brute.</p>
+      <div class="prim-aligns">
+        <span class="aligns-label">Aligne :</span>
+        <span class="dot dot-own"></span><span class="dot dot-cust"></span>
+      </div>
+    </div>
+
+    <div class="prim-card">
+      <div class="prim-head">
+        <span class="prim-num">03</span>
+        <span class="prim-tag tag-id">Identité</span>
+      </div>
+      <h4>Permissioned Domains</h4>
+      <p class="prim-desc">Espaces de circulation restreints aux porteurs de credentials valides. Indispensable pour les RWA conformes.</p>
+      <div class="prim-aligns">
+        <span class="aligns-label">Aligne :</span>
+        <span class="dot dot-own"></span><span class="dot dot-cust"></span><span class="dot dot-poss"></span>
+      </div>
+    </div>
+
+    <div class="prim-card">
+      <div class="prim-head">
+        <span class="prim-num">04</span>
+        <span class="prim-tag tag-control">Contrôle</span>
+      </div>
+      <h4>Freeze</h4>
+      <p class="prim-desc">L'émetteur peut <strong>geler</strong> un token sur un compte (décision de justice, sanctions, suspicion de fraude). Le token reste, mais ne bouge plus.</p>
+      <div class="prim-aligns">
+        <span class="aligns-label">Aligne :</span>
+        <span class="dot dot-own"></span><span class="dot dot-poss"></span>
+      </div>
+    </div>
+
+    <div class="prim-card">
+      <div class="prim-head">
+        <span class="prim-num">05</span>
+        <span class="prim-tag tag-control">Contrôle</span>
+      </div>
+      <h4>Clawback</h4>
+      <p class="prim-desc">L'émetteur peut <strong>récupérer</strong> un token émis (correction d'erreur, vol, décision de justice). Le ledger rattrape la loi.</p>
+      <div class="prim-aligns">
+        <span class="aligns-label">Aligne :</span>
+        <span class="dot dot-own"></span><span class="dot dot-poss"></span>
+      </div>
+    </div>
+
+    <div class="prim-card">
+      <div class="prim-head">
+        <span class="prim-num">06</span>
+        <span class="prim-tag tag-issue">Émission</span>
+      </div>
+      <h4>MPT (Multi-Purpose Tokens)</h4>
+      <p class="prim-desc">Tokens structurés avec métadonnées et règles intégrées (transférabilité, plafonds, conditions). La conformité dans le token lui-même.</p>
+      <div class="prim-aligns">
+        <span class="aligns-label">Aligne :</span>
+        <span class="dot dot-own"></span><span class="dot dot-cust"></span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="prim-note">
+    <strong>Lecture clé.</strong> Ces primitives ne sont <em>pas</em> des limitations idéologiques imposées par les régulateurs. Ce sont des outils que XRPL fournit nativement pour permettre à un émetteur sérieux de construire un produit où la blockchain dit la même chose que le droit. Un protocole sans ces outils oblige à recoder la conformité en smart contracts — plus coûteux, plus risqué, moins auditable.
+  </div>
+
+  <!-- SCHEMA 6 : CHARGE REGLEMENTAIRE PAR COUCHE -->
+  <div class="section-title">
+    <span><span class="num">06</span> &nbsp; Charge réglementaire par couche</span>
+    <span>Qui doit quoi à qui ?</span>
+  </div>
+
+  <p style="font-size:15px;line-height:1.6;max-width:780px;margin-bottom:32px;color:var(--ink)">
+    Les trois couches ne pèsent pas le même poids juridique. <strong>Custody</strong> est la plus régulée. <strong>Ownership</strong> hérite du droit classique. <strong>Possession</strong> n'a pas de statut direct, mais déclenche des obligations par ricochet. Ce panorama est indicatif (juridiction UE dominante) — toujours valider avec un avocat sur ton cas précis.
+  </p>
+
+  <div class="regul-grid">
+
+    <div class="regul-card r-own">
+      <div class="regul-head">
+        <span class="dot dot-own"></span>
+        <h4>Ownership</h4>
+        <span class="weight w-medium">Charge : Moyenne</span>
+      </div>
+      <div class="regul-body">
+        <div class="regul-section">
+          <div class="rs-title">Cadres applicables</div>
+          <ul>
+            <li>Droit civil (propriété, contrats, succession)</li>
+            <li>Droit des titres financiers si le token est <em>security</em></li>
+            <li>MiCA Title II si "autre crypto-actif"</li>
+            <li>RGPD si données personnelles attachées</li>
+          </ul>
+        </div>
+        <div class="regul-section">
+          <div class="rs-title">Obligations typiques pour l'émetteur</div>
+          <ul>
+            <li>Whitepaper MiCA (depuis dec. 2025)</li>
+            <li>Registre des porteurs à jour</li>
+            <li>Information périodique</li>
+            <li>Document d'information (prospectus si security)</li>
+            <li>Droit de la conso si grand public</li>
+          </ul>
+        </div>
+        <div class="regul-section">
+          <div class="rs-title">Documents contractuels</div>
+          <ul>
+            <li>Terms of Token</li>
+            <li>Subscription Agreement</li>
+            <li>Risk Disclosure</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="regul-card r-cust">
+      <div class="regul-head">
+        <span class="dot dot-cust"></span>
+        <h4>Custody</h4>
+        <span class="weight w-heavy">Charge : Très lourde</span>
+      </div>
+      <div class="regul-body">
+        <div class="regul-section">
+          <div class="rs-title">Cadres applicables</div>
+          <ul>
+            <li><strong>MiCA → agrément CASP obligatoire</strong> (UE)</li>
+            <li>NY BitLicense / Trust Charter (USA-NY)</li>
+            <li>FinCEN MSB (USA fédéral)</li>
+            <li>Directive LCB-FT (AMLD)</li>
+          </ul>
+        </div>
+        <div class="regul-section">
+          <div class="rs-title">Obligations typiques pour le custodian</div>
+          <ul>
+            <li>Capital minimum (125 000 € sous MiCA)</li>
+            <li>Ségrégation stricte des actifs clients</li>
+            <li>Responsabilité en cas de perte</li>
+            <li>Plan de continuité d'activité (PCA)</li>
+            <li>KYC / LCB-FT obligatoire</li>
+            <li>Audits réguliers, reporting régulateur</li>
+            <li>Assurance contre les sinistres</li>
+          </ul>
+        </div>
+        <div class="regul-section">
+          <div class="rs-title">Documents contractuels</div>
+          <ul>
+            <li>Custody Agreement détaillé</li>
+            <li>Service Level Agreement (SLA)</li>
+            <li>Politique de gestion des clés</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="regul-card r-poss">
+      <div class="regul-head">
+        <span class="dot dot-poss"></span>
+        <h4>Possession</h4>
+        <span class="weight w-indirect">Charge : Indirecte mais sournoise</span>
+      </div>
+      <div class="regul-body">
+        <div class="regul-section">
+          <div class="rs-title">Pas de statut juridique direct, MAIS…</div>
+          <ul>
+            <li>Si possession pour autrui → custody régulée</li>
+            <li>Recel pénal si actif volé (même sans intention)</li>
+            <li>Sanctions OFAC / UE si fonds liés à entité sanctionnée</li>
+            <li>Responsabilité employeur si clés détenues par salarié</li>
+            <li>Travel Rule (FATF) sur transferts &gt; seuils</li>
+          </ul>
+        </div>
+        <div class="regul-section">
+          <div class="rs-title">Obligations de fait pour qui possède</div>
+          <ul>
+            <li>Screening on-chain (Chainalysis, Elliptic)</li>
+            <li>Preuve d'origine des fonds (provenance)</li>
+            <li>Vigilance LCB-FT</li>
+            <li>Sécurité opérationnelle des clés</li>
+          </ul>
+        </div>
+        <div class="regul-section">
+          <div class="rs-title">Documents internes recommandés</div>
+          <ul>
+            <li>Key Management Policy</li>
+            <li>Incident Response Plan</li>
+            <li>Procédure de screening</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SCHEMA 7 : ARBRE DE DECISION -->
+  <div class="section-title">
+    <span><span class="num">07</span> &nbsp; Arbre de qualification du token</span>
+    <span>Quel régime juridique pour mon token ?</span>
+  </div>
+
+  <p style="font-size:15px;line-height:1.6;max-width:780px;margin-bottom:32px;color:var(--ink)">
+    La qualification juridique de ton token détermine la pile d'obligations qui s'empile au-dessus. Cet arbre est une <strong>première grille de tri</strong> (cadre UE/MiCA dominant) — la qualification définitive nécessite un avis juridique formel.
+  </p>
+
+  <div class="tree">
+
+    <div class="tree-q tree-start">
+      <div class="q-label">Question de départ</div>
+      <div class="q-text">Ton token représente-t-il un droit sur un actif sous-jacent traditionnel (action, obligation, part de fonds, créance) ?</div>
+      <div class="q-branches">
+        <div class="branch branch-yes">
+          <span class="b-arrow">OUI →</span>
+          <div class="b-result r-security">
+            <div class="r-label">SECURITY TOKEN</div>
+            <div class="r-desc">Titre financier classique, tokenisé. Régime des marchés financiers (MiFID II, prospectus, AMF, ESMA).</div>
+            <div class="r-burden">Charge : <strong>Maximale</strong></div>
+            <div class="r-ex">Ex : part de fonds tokenisée, créance B2B, action de société</div>
+          </div>
+        </div>
+        <div class="branch branch-no">
+          <span class="b-arrow">NON ↓</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tree-q">
+      <div class="q-label">Question 2</div>
+      <div class="q-text">Ton token est-il adossé à une seule monnaie fiat officielle (€, $, £) avec promesse de remboursement à parité ?</div>
+      <div class="q-branches">
+        <div class="branch branch-yes">
+          <span class="b-arrow">OUI →</span>
+          <div class="b-result r-emt">
+            <div class="r-label">E-MONEY TOKEN (EMT)</div>
+            <div class="r-desc">Régime MiCA Titre IV. Émetteur doit être agréé établissement de monnaie électronique ou de crédit.</div>
+            <div class="r-burden">Charge : <strong>Très lourde</strong></div>
+            <div class="r-ex">Ex : RLUSD, EURC, USDC tokenisé</div>
+          </div>
+        </div>
+        <div class="branch branch-no">
+          <span class="b-arrow">NON ↓</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tree-q">
+      <div class="q-label">Question 3</div>
+      <div class="q-text">Ton token est-il adossé à un panier d'actifs (plusieurs monnaies, matières premières, mix) pour stabiliser sa valeur ?</div>
+      <div class="q-branches">
+        <div class="branch branch-yes">
+          <span class="b-arrow">OUI →</span>
+          <div class="b-result r-art">
+            <div class="r-label">ASSET-REFERENCED TOKEN (ART)</div>
+            <div class="r-desc">Régime MiCA Titre III. Agrément spécifique, réserves obligatoires, whitepaper validé par le régulateur.</div>
+            <div class="r-burden">Charge : <strong>Lourde</strong></div>
+            <div class="r-ex">Ex : stablecoin multi-collatéral, token panier</div>
+          </div>
+        </div>
+        <div class="branch branch-no">
+          <span class="b-arrow">NON ↓</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tree-q">
+      <div class="q-label">Question 4</div>
+      <div class="q-text">Ton token donne-t-il accès à un service ou produit spécifique fourni par l'émetteur, sans promesse de valeur ?</div>
+      <div class="q-branches">
+        <div class="branch branch-yes">
+          <span class="b-arrow">OUI →</span>
+          <div class="b-result r-utility">
+            <div class="r-label">UTILITY TOKEN</div>
+            <div class="r-desc">Régime MiCA Titre II allégé. Whitepaper requis mais pas d'agrément. Exemption possible si réseau fermé.</div>
+            <div class="r-burden">Charge : <strong>Moyenne</strong></div>
+            <div class="r-ex">Ex : points de fidélité, accès SaaS prépayé, jetons gaming</div>
+          </div>
+        </div>
+        <div class="branch branch-no">
+          <span class="b-arrow">NON →</span>
+          <div class="b-result r-other">
+            <div class="r-label">"AUTRE CRYPTO-ACTIF"</div>
+            <div class="r-desc">Catégorie résiduelle MiCA Titre II. Whitepaper obligatoire mais régime le plus léger.</div>
+            <div class="r-burden">Charge : <strong>Légère</strong></div>
+            <div class="r-ex">Ex : XRP, BTC, ETH (natifs non émis par une entité unique)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tree-footnote">
+      <strong>Note importante.</strong> Cet arbre ne prend pas en compte les exemptions spécifiques : NFT uniques non fongibles (hors scope MiCA), tokens utilisés en réseau fermé limité, offres &lt; 1 M€ sur 12 mois, etc. Le test juridique de qualification est <em>substantiel</em>, pas formel : c'est la fonction économique réelle du token qui détermine son régime, pas son nom marketing.
+    </div>
+
+  </div>
+
+  <!-- TAKEAWAY -->
+  <div class="takeaway">
+    <div class="ta-label">— Pour l'entrepreneur —</div>
+
+    <h2>Avant de tokeniser quoi que ce soit,<br>demande-toi : <em>qui a quoi ?</em></h2>
+    <p>Pour chaque actif numérique que tu manipules dans ton produit : qui en est <strong>propriétaire</strong>, qui en a la <strong>garde</strong>, qui en a la <strong>possession technique</strong> ? Et quelle <strong>qualification juridique</strong> s'applique au token ?</p>
+    <p>Si tu ne peux pas répondre clairement aux quatre questions, tu n'es pas prêt à lancer.</p>
+    <p style="opacity:0.7;font-style:italic;font-family:'Fraunces',serif;">Une grille simple, qui évite des problèmes complexes.</p>
+
+    <div class="ta-extra">
+      <div class="ta-extra-title">Pour aller plus loin</div>
+
+      <div class="ta-variant ta-aware">
+        <span class="lvl-tag" style="background:var(--accent-cust);color:var(--paper)">Niveau intermédiaire</span>
+        <h3>La blockchain ne connaît que la <em>possession</em>.</h3>
+        <p>Tout le travail de conception d'un produit XRPL consiste à <strong>rapprocher</strong> la possession on-chain de l'ownership juridique. KYC, custodians régulés, freeze, clawback, credentials existent précisément pour ça. La qualification juridique du token détermine la pile d'obligations qui s'empile par-dessus la techno.</p>
+        <p class="ta-sig">"Not your keys, not your coins" est vrai. Mais incomplet.</p>
+      </div>
+
+      <div class="ta-variant ta-advanced">
+        <span class="lvl-tag" style="background:var(--accent-own);color:var(--paper)">Niveau avancé</span>
+        <h3>Designer XRPL, c'est designer l'<em>alignement</em>.</h3>
+        <p>Chaque primitive (trustline, credential, freeze, clawback, MPT, permissioned domain) est un outil pour maintenir la cohérence entre les trois couches. Et chaque qualification (security, EMT, ART, utility, other) déclenche une pile d'obligations distincte. Ton architecture produit doit expliciter, pour chaque flux, quelle primitive garantit quel alignement, et sous quel régime juridique.</p>
+        <p class="ta-sig">Si tu ne sais pas où se trouvent ownership, custody et possession dans ton produit, et sous quel régime il opère, tu ne sais pas ce que tu vends.</p>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <span>Pédagogie XRPL · Fiche 01</span>
+    <span>Triade conceptuelle</span>
+  </div>
+
+</div>
+
+</div>
+
+<div data-lang="en">
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <span class="kicker">XRPL · Entrepreneur education</span>
+    <span class="edition">Sheet 01 / The triad</span>
+  </div>
+
+  <h1>
+    <span class="word-own">Ownership</span><span class="sep"> · </span><span class="word-cust">Custody</span><span class="sep"> · </span><span class="word-poss">Possession</span>
+  </h1>
+  <p class="dek">
+    Before discussing property or custody, a more fundamental distinction must be established: <strong>the asset</strong> and its <strong>digital representation</strong> are not the same thing. All XRPL pedagogy rests on this.
+  </p>
+
+  <!-- ACCROCHE -->
+  <div class="hook">
+    <div class="hook-inner">
+      <div class="hook-q">"My crypto is on Coinbase. It belongs to me, right?"</div>
+      <div class="hook-sub">Spoiler: yes and no. And this nuance changes everything.</div>
+    </div>
+    <div class="lvl-more">
+      <div class="lvl-item lvl-aware">
+        <span class="lvl-tag">Variant · Aware</span>
+        <div style="font-family:'Fraunces',serif;font-style:italic;font-weight:700;font-size:20px;line-height:1.2;margin-bottom:6px">"Not your keys, not your coins." Really?</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)">The famous slogan hides a more nuanced truth.</div>
+      </div>
+      <div class="lvl-item lvl-advanced">
+        <span class="lvl-tag">Variant · Advanced</span>
+        <div style="font-family:'Fraunces',serif;font-style:italic;font-weight:700;font-size:20px;line-height:1.2;margin-bottom:6px">On XRPL, transferring a token is <em>not</em> transferring ownership.</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)">Understand the difference to design a compliant product.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCHEMA 0 : BIEN VS REPRESENTATION -->
+  <div class="section-title">
+    <span><span class="num">00</span> &nbsp; The founding distinction</span>
+    <span>Before everything else</span>
+  </div>
+
+  <p style="font-size:15px;line-height:1.6;max-width:780px;margin-bottom:32px;color:var(--ink)">
+    A token on XRPL is not the asset. It is a <strong>representation</strong> of the asset. These two objects are distinct, connected by a legal or contractual <strong>bridge</strong>. Understanding this duality is understanding all of XRPL.
+  </p>
+
+  <div class="dual">
+
+    <div class="dual-side dual-real">
+      <div class="dual-label">The asset</div>
+      <div class="dual-icon">◼</div>
+      <h4>The real asset</h4>
+      <p>Exists in the physical or legal world, independent of any blockchain.</p>
+      <div class="dual-ex">
+        <div class="ex-row">A building</div>
+        <div class="ex-row">A commercial receivable</div>
+        <div class="ex-row">A fund share</div>
+        <div class="ex-row">A dollar in a bank</div>
+        <div class="ex-row">A work of art</div>
+      </div>
+      <div class="dual-rules">
+        <span class="dr-label">Governed by:</span>
+        <span class="dr-val">Real-world law</span>
+      </div>
+    </div>
+
+    <div class="dual-bridge">
+      <div class="bridge-line"></div>
+      <div class="bridge-content">
+        <div class="bridge-label">The bridge</div>
+        <div class="bridge-desc">Contract, legal framework, attestation</div>
+        <div class="bridge-arrow">⇄</div>
+        <div class="bridge-warn">If this bridge breaks, the representation loses its meaning.</div>
+      </div>
+    </div>
+
+    <div class="dual-side dual-digital">
+      <div class="dual-label">The representation</div>
+      <div class="dual-icon">◇</div>
+      <h4>The digital asset</h4>
+      <p>Exists on the XRPL ledger. A token (IOU, MPT, NFT) that <em>points</em> to the asset.</p>
+      <div class="dual-ex">
+        <div class="ex-row">A real-estate MPT</div>
+        <div class="ex-row">A receivable token</div>
+        <div class="ex-row">A fund share tokenisée</div>
+        <div class="ex-row">An RLUSD</div>
+        <div class="ex-row">A certificate NFT</div>
+      </div>
+      <div class="dual-rules">
+        <span class="dr-label">Governed by:</span>
+        <span class="dr-val">The XRPL protocol</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="dual-cases">
+    <div class="dc-title">Three cases that illuminate the duality</div>
+    <div class="dc-grid">
+
+      <div class="dc-card dc-1">
+        <div class="dc-num">Case 1</div>
+        <h5>Representation <em>=</em> asset</h5>
+        <p>No bridge. The token <em>is</em> the asset. No duality.</p>
+        <div class="dc-ex">E.g.: XRP, BTC, ETH (native assets)</div>
+      </div>
+
+      <div class="dc-card dc-2">
+        <div class="dc-num">Case 2</div>
+        <h5>Representation <em>↔</em> asset</h5>
+        <p>Two objects, a solid legal bridge. The standard for serious tokenization.</p>
+        <div class="dc-ex">E.g.: RLUSD, compliant RWAs, regulated stablecoins</div>
+      </div>
+
+      <div class="dc-card dc-3">
+        <div class="dc-num">Case 3</div>
+        <h5>Representation <em>without</em> asset</h5>
+        <p>The token claims to represent something that does not (or no longer) exists. Classic scam.</p>
+        <div class="dc-ex">E.g.: tokens "backed" by fictitious assets</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="dual-question">
+    <div class="dq-label">The question that reveals the bridge's quality</div>
+    <div class="dq-text">"What happens to the asset <strong>if the XRPL ledger disappears tomorrow</strong>?"</div>
+    <div class="dq-grid">
+      <div class="dq-row"><span class="dq-asset">For XRP / BTC</span><span class="dq-arr">→</span><span class="dq-result">The asset disappears with it. Token and asset are the same thing.</span></div>
+      <div class="dq-row"><span class="dq-asset">Well-designed stablecoin</span><span class="dq-arr">→</span><span class="dq-result">The dollar in the bank still exists. A new issuer can redistribute.</span></div>
+      <div class="dq-row"><span class="dq-asset">Well-designed RWA</span><span class="dq-arr">→</span><span class="dq-result">The building still exists, the legal registry confirms it.</span></div>
+      <div class="dq-row dq-bad"><span class="dq-asset">Poorly designed representation</span><span class="dq-arr">→</span><span class="dq-result">You lost the asset. The asset may not have really existed.</span></div>
+    </div>
+  </div>
+
+  <div class="dual-footnote">
+    <strong>The golden rule to remember.</strong> The triad <em>Ownership · Custody · Possession</em> we're about to explore applies to the <strong>representation</strong> (the token). The <strong>asset itself</strong> obeys the law that governs it in the real world. All the design work of an XRPL product consists of <strong>building and maintaining the bridge</strong> between the two.
+  </div>
+
+  <!-- SCHEMA 1 : LES TROIS CONCEPTS -->
+  <div class="section-title">
+    <span><span class="num">01</span> &nbsp; Cardinal definitions</span>
+    <span>The right · The mandate · The fact</span>
+  </div>
+
+  <p style="font-size:14px;line-height:1.6;max-width:780px;margin-bottom:24px;color:var(--muted);font-family:'Fraunces',serif;font-style:italic;border-left:3px solid var(--accent-poss);padding-left:18px">
+    Reminder: these three concepts apply to the <strong style="font-style:normal">digital representation</strong> (the object handled on XRPL — the <em>property</em> in the sense of "what is owned"), not to the underlying real asset.
+  </p>
+
+  <div class="triad">
+    <div class="triad-card own">
+      <div class="icon">§</div>
+      <span class="label">The right</span>
+      <div class="en">Ownership</div>
+      <div class="fr">Propriété</div>
+      <div class="nature">Recognized by law</div>
+      <p class="desc">The <strong>legal</strong> title to the asset. Recognized by a court, enforceable against third parties, transferable by inheritance.</p>
+      <p class="quote">"This asset belongs to me under the law."</p>
+    </div>
+
+    <div class="triad-card cust">
+      <div class="icon">⌘</div>
+      <span class="label">The mandate</span>
+      <div class="en">Custody</div>
+      <div class="fr">Garde</div>
+      <div class="nature">Contractual responsibility</div>
+      <p class="desc">The formalized <strong>responsibility</strong> of keeping and protecting the asset on behalf of another. A role, not a fact.</p>
+      <p class="quote">"I am responsible for protecting this asset."</p>
+    </div>
+
+    <div class="triad-card poss">
+      <div class="icon">◉</div>
+      <span class="label">The fact</span>
+      <div class="en">Possession</div>
+      <div class="fr">Détention</div>
+      <div class="nature">Effective control, here and now</div>
+      <p class="desc"><strong>Material</strong> control. On XRPL: who holds the private keys <em>at time T</em>. No legal dimension.</p>
+      <p class="quote">"I can move this asset, right now."</p>
+    </div>
+  </div>
+
+  <!-- SCHEMA INTERMEDIAIRE : METAPHORE -->
+  <div class="section-title">
+    <span><span class="num">01·5</span> &nbsp; A metaphor to anchor it</span>
+    <span>Three angles, from simplest to most technical</span>
+  </div>
+
+  <div class="metaphor-block">
+
+    <!-- Métaphore principale : la voiture -->
+    <div class="meta-grid">
+      <div class="meta-left">
+        <h3>The car metaphor</h3>
+        <p class="meta-intro">Three people can have a relationship with a car, without having the same type of relationship.</p>
+      </div>
+      <div class="meta-right">
+        <div class="meta-block m-own">
+          <strong>Ownership — The vehicle title</strong>
+          <p>The legal titleholder of the vehicle. The owner according to the State.</p>
+          <p class="ex">E.g.: your name on the title</p>
+        </div>
+        <div class="meta-block m-cust">
+          <strong>Custody — The garage / the dealer</strong>
+          <p>The one officially in charge, by contract.</p>
+          <p class="ex">E.g.: the dealer during service</p>
+        </div>
+        <div class="meta-block m-poss">
+          <strong>Possession — Keys in hand</strong>
+          <p>The one who can start it and drive, right now.</p>
+          <p class="ex">E.g.: the valet, or a thief</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Compléments : 2 autres angles, plus compacts -->
+    <div class="meta-extra">
+      <div class="me-title">Two other angles, to go further</div>
+
+      <div class="me-grid">
+
+        <div class="me-card">
+          <span class="lvl-tag" style="background:var(--accent-cust);margin-bottom:10px">For those familiar with finance</span>
+          <h4>The securities account metaphor</h4>
+          <p class="me-intro">Same structure as in traditional finance.</p>
+          <ul class="me-list">
+            <li><span class="me-dot d-own"></span><strong>Ownership</strong> — The investor (you on your Schwab/Fidelity account)</li>
+            <li><span class="me-dot d-cust"></span><strong>Custody</strong> — The qualified custodian (e.g., State Street, BNY Mellon)</li>
+            <li><span class="me-dot d-poss"></span><strong>Possession</strong> — The executing operator (custodian; or an attacker in case of intrusion)</li>
+          </ul>
+        </div>
+
+        <div class="me-card">
+          <span class="lvl-tag" style="background:var(--accent-own);margin-bottom:10px">For those familiar with the tech</span>
+          <h4>The triad in XRPL logic</h4>
+          <p class="me-intro">Three stacked layers. The blockchain only sees the third.</p>
+          <ul class="me-list">
+            <li><span class="me-dot d-own"></span><strong>Ownership</strong> — Off-chain. Applicable law, source = court</li>
+            <li><span class="me-dot d-cust"></span><strong>Custody</strong> — Semi-chain. Contract + credentials</li>
+            <li><span class="me-dot d-poss"></span><strong>Possession</strong> — On-chain. ed25519/secp256k1 signature</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SCHEMA 2 : MATRICE -->
+  <div class="section-title">
+    <span><span class="num">02</span> &nbsp; Configuration matrix</span>
+    <span>Who holds what, really?</span>
+  </div>
+
+  <div class="matrix-wrap">
+    <table class="matrix">
+      <thead>
+        <tr>
+          <th style="background:var(--ink)">Configuration</th>
+          <th class="col-own"><span class="dot dot-own" style="background:#fff"></span>Ownership</th>
+          <th class="col-cust"><span class="dot dot-cust" style="background:#fff"></span>Custody</th>
+          <th class="col-poss"><span class="dot dot-poss" style="background:#000"></span>Possession</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <div class="case-name">Startup treasury in self-custody</div>
+            <div class="case-sub">Stablecoins paid by B2B clients</div>
+          </td>
+          <td class="cell-actor same">The company</td>
+          <td class="cell-actor same">The company</td>
+          <td class="cell-actor different">CEO + CFO (multisig)</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="case-name">Tokenized loyalty program</div>
+            <div class="case-sub">Customer points issued by a retailer</div>
+          </td>
+          <td class="cell-actor same">The customer</td>
+          <td class="cell-actor different">The brand's app</td>
+          <td class="cell-actor different">The brand's app</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="case-name">Tokenized invoice (factoring)</div>
+            <div class="case-sub">MPT representing a B2B receivable</div>
+          </td>
+          <td class="cell-actor same">The investor-buyer</td>
+          <td class="cell-actor different">Regulated platform (CASP / MSB)</td>
+          <td class="cell-actor different">Regulated platform</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="case-name">SaaS billed in XRPL stablecoin</div>
+            <div class="case-sub">International customer collection</div>
+          </td>
+          <td class="cell-actor same">The SaaS vendor</td>
+          <td class="cell-actor different">Crypto PSP (or ops wallet)</td>
+          <td class="cell-actor different">Crypto PSP</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="case-name">Tokenized fund share</div>
+            <div class="case-sub">On-chain money market fund</div>
+          </td>
+          <td class="cell-actor same">The investor</td>
+          <td class="cell-actor different">Regulated custodian</td>
+          <td class="cell-actor different">Regulated custodian</td>
+        </tr>
+        <tr>
+          <td>
+            <div class="case-name">Operational key compromise</div>
+            <div class="case-sub">Phishing of a signatory executive</div>
+          </td>
+          <td class="cell-actor same">The company <em>(juridiquement)</em></td>
+          <td class="cell-actor different">— compromised —</td>
+          <td class="cell-actor danger">The attacker</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SCHEMA 3 : FLUX DE TRANSFERT -->
+  <div class="section-title">
+    <span><span class="num">03</span> &nbsp; What exactly is being transferred?</span>
+    <span>Three layers, three transactions</span>
+  </div>
+
+  <div class="flow">
+    <div class="flow-title">Anatomy of a tokenized asset transfer</div>
+    <div class="flow-grid">
+
+      <div class="flow-layer l-own">
+        <div class="layer-num">— Layer 1 —</div>
+        <div class="layer-name">Ownership</div>
+        <div class="layer-where">Legal registry / contract</div>
+        <div class="layer-what">Legal ownership transfers according to the country's applicable law.</div>
+        <div class="layer-tx">tx_legal = notarial deed<br>or contractual assignment</div>
+      </div>
+
+      <div class="flow-layer l-cust">
+        <div class="layer-num">— Layer 2 —</div>
+        <div class="layer-name">Custody</div>
+        <div class="layer-where">Mandate with a custodian</div>
+        <div class="layer-what">Custody responsibility transfers via depositary contract.</div>
+        <div class="layer-tx">tx_mandate = new<br>custody contract</div>
+      </div>
+
+      <div class="flow-layer l-poss">
+        <div class="layer-num">— Layer 3 —</div>
+        <div class="layer-name">Possession</div>
+        <div class="layer-where">The XRPL ledger</div>
+        <div class="layer-what">Technical control transfers via an on-chain transaction signature.</div>
+        <div class="layer-tx">tx_xrpl = Payment<br>or signed OfferCreate</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SCHEMA 4 : ALIGNEMENT -->
+  <div class="section-title">
+    <span><span class="num">04</span> &nbsp; Alignment vs misalignment</span>
+    <span>The golden rule of design</span>
+  </div>
+
+  <div class="alignment">
+    <div class="align-card good">
+      <span class="status">✓ Healthy alignment</span>
+      <h3>The three layers are synchronized</h3>
+      <p class="scenario">An investor buys a tokenized fund share. The regulated custodian receives the MPT on XRPL, KYC is validated, the legal title is registered in the investor's name.</p>
+      <div class="align-line"><span class="who"><span class="dot dot-own"></span>Ownership</span><span class="arrow">→</span><span class="who">Investor</span></div>
+      <div class="align-line"><span class="who"><span class="dot dot-cust"></span>Custody</span><span class="arrow">→</span><span class="who">Regulated custodian</span></div>
+      <div class="align-line"><span class="who"><span class="dot dot-poss"></span>Possession</span><span class="arrow">→</span><span class="who">Custodian (keys)</span></div>
+    </div>
+
+    <div class="align-card bad">
+      <span class="status">✗ Critical misalignment</span>
+      <h3>The ledger and the law diverge</h3>
+      <p class="scenario">A real-estate token is stolen. On the XRPL ledger, the hacker has possession and can resell it. The law still recognizes the original owner. Conflict: the blockchain says A, the court says B.</p>
+      <div class="align-line"><span class="who"><span class="dot dot-own"></span>Ownership</span><span class="arrow">→</span><span class="who">Victim (legally)</span></div>
+      <div class="align-line"><span class="who"><span class="dot dot-cust"></span>Custody</span><span class="arrow">→</span><span class="who" style="color:var(--muted)">— empty —</span></div>
+      <div class="align-line"><span class="who"><span class="dot dot-poss"></span>Possession</span><span class="arrow">→</span><span class="who" style="color:var(--accent-own);font-weight:700">Hacker (factual)</span></div>
+    </div>
+  </div>
+
+  <!-- SCHEMA 5 : PRIMITIVES XRPL D'ALIGNEMENT -->
+  <div class="section-title">
+    <span><span class="num">05</span> &nbsp; The XRPL toolkit</span>
+    <span>The primitives that maintain alignment</span>
+  </div>
+
+  <p style="font-size:15px;line-height:1.6;max-width:780px;margin-bottom:32px;color:var(--ink)">
+    XRPL provides native features — not smart contracts to code, but primitives built into the protocol — that allow a regulated issuer to <strong>maintain alignment</strong> between on-chain possession and legal ownership. Here are the six levers to know.
+  </p>
+
+  <div class="primitives">
+
+    <div class="prim-card">
+      <div class="prim-head">
+        <span class="prim-num">01</span>
+        <span class="prim-tag tag-issue">Issuance</span>
+      </div>
+      <h4>Trustlines</h4>
+      <p class="prim-desc">The holder must <strong>explicitly accept</strong> each token type. The issuer knows all its holders.</p>
+      <div class="prim-aligns">
+        <span class="aligns-label">Aligns:</span>
+        <span class="dot dot-own"></span><span class="dot dot-poss"></span>
+      </div>
+    </div>
+
+    <div class="prim-card">
+      <div class="prim-head">
+        <span class="prim-num">02</span>
+        <span class="prim-tag tag-id">Identity</span>
+      </div>
+      <h4>Credentials</h4>
+      <p class="prim-desc">On-chain attestations (KYC, accreditation, age) issued by an authority. Verifiable without revealing the raw data.</p>
+      <div class="prim-aligns">
+        <span class="aligns-label">Aligns:</span>
+        <span class="dot dot-own"></span><span class="dot dot-cust"></span>
+      </div>
+    </div>
+
+    <div class="prim-card">
+      <div class="prim-head">
+        <span class="prim-num">03</span>
+        <span class="prim-tag tag-id">Identity</span>
+      </div>
+      <h4>Permissioned Domains</h4>
+      <p class="prim-desc">Circulation spaces restricted to holders of valid credentials. Essential for compliant RWAs.</p>
+      <div class="prim-aligns">
+        <span class="aligns-label">Aligns:</span>
+        <span class="dot dot-own"></span><span class="dot dot-cust"></span><span class="dot dot-poss"></span>
+      </div>
+    </div>
+
+    <div class="prim-card">
+      <div class="prim-head">
+        <span class="prim-num">04</span>
+        <span class="prim-tag tag-control">Control</span>
+      </div>
+      <h4>Freeze</h4>
+      <p class="prim-desc">The issuer can <strong>freeze</strong> a token on an account (court order, sanctions, fraud suspicion). The token stays but can no longer move.</p>
+      <div class="prim-aligns">
+        <span class="aligns-label">Aligns:</span>
+        <span class="dot dot-own"></span><span class="dot dot-poss"></span>
+      </div>
+    </div>
+
+    <div class="prim-card">
+      <div class="prim-head">
+        <span class="prim-num">05</span>
+        <span class="prim-tag tag-control">Control</span>
+      </div>
+      <h4>Clawback</h4>
+      <p class="prim-desc">The issuer can <strong>claw back</strong> an issued token (error correction, theft, court order). The ledger catches up with the law.</p>
+      <div class="prim-aligns">
+        <span class="aligns-label">Aligns:</span>
+        <span class="dot dot-own"></span><span class="dot dot-poss"></span>
+      </div>
+    </div>
+
+    <div class="prim-card">
+      <div class="prim-head">
+        <span class="prim-num">06</span>
+        <span class="prim-tag tag-issue">Issuance</span>
+      </div>
+      <h4>MPT (Multi-Purpose Tokens)</h4>
+      <p class="prim-desc">Structured tokens with metadata and built-in rules (transferability, caps, conditions). Compliance in the token itself.</p>
+      <div class="prim-aligns">
+        <span class="aligns-label">Aligns:</span>
+        <span class="dot dot-own"></span><span class="dot dot-cust"></span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="prim-note">
+    <strong>Key reading.</strong> These primitives are <em>not</em> ideological limitations imposed by regulators. They are tools XRPL provides natively to allow a serious issuer to build a product where the blockchain says the same thing as the law. A protocol without these tools forces compliance to be re-coded in smart contracts — more costly, riskier, less auditable.
+  </div>
+
+  <!-- SCHEMA 6 : CHARGE REGLEMENTAIRE PAR COUCHE -->
+  <div class="section-title">
+    <span><span class="num">06</span> &nbsp; Regulatory burden by layer</span>
+    <span>Who owes what to whom?</span>
+  </div>
+
+  <p style="font-size:15px;line-height:1.6;max-width:780px;margin-bottom:32px;color:var(--ink)">
+    The three layers do not carry the same legal weight. <strong>Custody</strong> is the most regulated. <strong>Ownership</strong> inherits from classic law. <strong>Possession</strong> has no direct status but triggers obligations indirectly. This overview spans both EU (MiCA) and US (BitLicense, FinCEN, state trust charters) frameworks — always validate with a lawyer for your specific jurisdiction.
+  </p>
+
+  <div class="regul-grid">
+
+    <div class="regul-card r-own">
+      <div class="regul-head">
+        <span class="dot dot-own"></span>
+        <h4>Ownership</h4>
+        <span class="weight w-medium">Burden: Medium</span>
+      </div>
+      <div class="regul-body">
+        <div class="regul-section">
+          <div class="rs-title">Applicable frameworks</div>
+          <ul>
+            <li>Civil law (property, contracts, inheritance)</li>
+            <li>Securities law if the token is a <em>security</em></li>
+            <li>MiCA Title II if "other crypto-asset"</li>
+            <li>GDPR if personal data is attached</li>
+          </ul>
+        </div>
+        <div class="regul-section">
+          <div class="rs-title">Typical obligations for the issuer</div>
+          <ul>
+            <li>MiCA whitepaper (EU) / SEC disclosure (US)</li>
+            <li>Up-to-date holders' registry</li>
+            <li>Periodic disclosure</li>
+            <li>Disclosure document (prospectus if security)</li>
+            <li>Consumer law if general public</li>
+          </ul>
+        </div>
+        <div class="regul-section">
+          <div class="rs-title">Contractual documents</div>
+          <ul>
+            <li>Terms of Token</li>
+            <li>Subscription Agreement</li>
+            <li>Risk Disclosure</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="regul-card r-cust">
+      <div class="regul-head">
+        <span class="dot dot-cust"></span>
+        <h4>Custody</h4>
+        <span class="weight w-heavy">Burden: Very heavy</span>
+      </div>
+      <div class="regul-body">
+        <div class="regul-section">
+          <div class="rs-title">Applicable frameworks</div>
+          <ul>
+            <li><strong>MiCA → mandatory CASP authorization</strong> (EU)</li>
+            <li>NY BitLicense / Trust Charter (US-NY)</li>
+            <li>FinCEN MSB (US federal)</li>
+            <li>AML Directive (EU AMLD) / Bank Secrecy Act (US BSA)</li>
+          </ul>
+        </div>
+        <div class="regul-section">
+          <div class="rs-title">Typical obligations for the custodian</div>
+          <ul>
+            <li>Minimum capital (€125K under MiCA / state-specific in US)</li>
+            <li>Strict segregation of client assets</li>
+            <li>Liability in case of loss</li>
+            <li>Business continuity plan (BCP)</li>
+            <li>Mandatory KYC / AML-CFT</li>
+            <li>Regular audits, regulator reporting</li>
+            <li>Insurance against losses</li>
+          </ul>
+        </div>
+        <div class="regul-section">
+          <div class="rs-title">Contractual documents</div>
+          <ul>
+            <li>Detailed Custody Agreement</li>
+            <li>Service Level Agreement (SLA)</li>
+            <li>Key management policy</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="regul-card r-poss">
+      <div class="regul-head">
+        <span class="dot dot-poss"></span>
+        <h4>Possession</h4>
+        <span class="weight w-indirect">Burden: Indirect but insidious</span>
+      </div>
+      <div class="regul-body">
+        <div class="regul-section">
+          <div class="rs-title">No direct legal status, BUT…</div>
+          <ul>
+            <li>If possession for another → regulated custody</li>
+            <li>Criminal handling if asset stolen (even unintentionally)</li>
+            <li>OFAC / EU sanctions if funds linked to sanctioned entity</li>
+            <li>Employer liability if keys held by employee</li>
+            <li>Travel Rule (FATF) on transfers &gt; thresholds</li>
+          </ul>
+        </div>
+        <div class="regul-section">
+          <div class="rs-title">De facto obligations for the possessor</div>
+          <ul>
+            <li>On-chain screening (Chainalysis, Elliptic)</li>
+            <li>Source-of-funds proof (provenance)</li>
+            <li>AML-CFT vigilance</li>
+            <li>Operational key security</li>
+          </ul>
+        </div>
+        <div class="regul-section">
+          <div class="rs-title">Recommended internal documents</div>
+          <ul>
+            <li>Key Management Policy</li>
+            <li>Incident Response Plan</li>
+            <li>Screening procedure</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SCHEMA 7 : ARBRE DE DECISION -->
+  <div class="section-title">
+    <span><span class="num">07</span> &nbsp; Token qualification tree</span>
+    <span>Which legal regime for my token?</span>
+  </div>
+
+  <p style="font-size:15px;line-height:1.6;max-width:780px;margin-bottom:32px;color:var(--ink)">
+    The legal qualification of your token determines the stack of obligations that piles on top. This tree is a <strong>first sorting grid</strong> (EU/MiCA framework dominant) — definitive qualification requires formal legal advice.
+  </p>
+
+  <div class="tree">
+
+    <div class="tree-q tree-start">
+      <div class="q-label">Starting question</div>
+      <div class="q-text">Does your token represent a right to a traditional underlying asset (share, bond, fund unit, receivable)?</div>
+      <div class="q-branches">
+        <div class="branch branch-yes">
+          <span class="b-arrow">YES →</span>
+          <div class="b-result r-security">
+            <div class="r-label">SECURITY TOKEN</div>
+            <div class="r-desc">Classic financial security, tokenized. Financial markets regime (MiFID II, prospectus, AMF, ESMA).</div>
+            <div class="r-burden">Burden: <strong>Maximum</strong></div>
+            <div class="r-ex">E.g.: tokenized fund share, B2B receivable, equity token</div>
+          </div>
+        </div>
+        <div class="branch branch-no">
+          <span class="b-arrow">NO ↓</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tree-q">
+      <div class="q-label">Question 2</div>
+      <div class="q-text">Is your token pegged to a single official fiat currency (€, $, £) with a promise of redemption at par?</div>
+      <div class="q-branches">
+        <div class="branch branch-yes">
+          <span class="b-arrow">YES →</span>
+          <div class="b-result r-emt">
+            <div class="r-label">E-MONEY TOKEN (EMT)</div>
+            <div class="r-desc">MiCA Title IV regime. Issuer must be authorized as an electronic money or credit institution.</div>
+            <div class="r-burden">Burden: <strong>Very heavy</strong></div>
+            <div class="r-ex">E.g.: USDC, RLUSD, PYUSD, tokenized USD</div>
+          </div>
+        </div>
+        <div class="branch branch-no">
+          <span class="b-arrow">NO ↓</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tree-q">
+      <div class="q-label">Question 3</div>
+      <div class="q-text">Is your token backed by a basket of assets (multiple currencies, commodities, mix) to stabilize its value?</div>
+      <div class="q-branches">
+        <div class="branch branch-yes">
+          <span class="b-arrow">YES →</span>
+          <div class="b-result r-art">
+            <div class="r-label">ASSET-REFERENCED TOKEN (ART)</div>
+            <div class="r-desc">MiCA Title III regime. Specific authorization, mandatory reserves, regulator-validated whitepaper.</div>
+            <div class="r-burden">Burden: <strong>Heavy</strong></div>
+            <div class="r-ex">E.g.: multi-collateral stablecoin, basket token</div>
+          </div>
+        </div>
+        <div class="branch branch-no">
+          <span class="b-arrow">NO ↓</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tree-q">
+      <div class="q-label">Question 4</div>
+      <div class="q-text">Does your token give access to a specific service or product provided by the issuer, with no promise of value?</div>
+      <div class="q-branches">
+        <div class="branch branch-yes">
+          <span class="b-arrow">YES →</span>
+          <div class="b-result r-utility">
+            <div class="r-label">UTILITY TOKEN</div>
+            <div class="r-desc">Lighter MiCA Title II regime. Whitepaper required but no authorization. Exemption possible if closed network.</div>
+            <div class="r-burden">Burden: <strong>Medium</strong></div>
+            <div class="r-ex">E.g.: loyalty points, prepaid SaaS access, gaming tokens</div>
+          </div>
+        </div>
+        <div class="branch branch-no">
+          <span class="b-arrow">NO →</span>
+          <div class="b-result r-other">
+            <div class="r-label">"OTHER CRYPTO-ASSET"</div>
+            <div class="r-desc">Residual MiCA Title II category. Whitepaper mandatory but lightest regime.</div>
+            <div class="r-burden">Burden: <strong>Light</strong></div>
+            <div class="r-ex">E.g.: XRP, BTC, ETH (native, not issued by a single entity)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tree-footnote">
+      <strong>Important note.</strong> This tree follows the EU MiCA framework. Under US securities law (Howey test), the qualification logic is similar but stricter on what counts as a "security". Specific exemptions exist on both sides: unique non-fungible NFTs (outside MiCA scope), tokens in limited closed networks, offers &lt; €1M / Reg D / Reg S thresholds, etc. The legal qualification test is <em>substantive</em>, not formal: it is the token's real economic function that determines its regime, not its marketing name.
+    </div>
+
+  </div>
+
+  <!-- TAKEAWAY -->
+  <div class="takeaway">
+    <div class="ta-label">— For the entrepreneur —</div>
+
+    <h2>Before tokenizing anything,<br>ask yourself: <em>who has what?</em></h2>
+    <p>For every digital asset you handle in your product: who is the <strong>owner</strong>, who has <strong>custody</strong>, who has <strong>technical possession</strong>? And what <strong>legal qualification</strong> applies to the token?</p>
+    <p>If you cannot clearly answer all four questions, you are not ready to launch.</p>
+    <p style="opacity:0.7;font-style:italic;font-family:'Fraunces',serif;">A simple grid that avoids complex problems.</p>
+
+    <div class="ta-extra">
+      <div class="ta-extra-title">To go further</div>
+
+      <div class="ta-variant ta-aware">
+        <span class="lvl-tag" style="background:var(--accent-cust);color:var(--paper)">Intermediate level</span>
+        <h3>The blockchain only knows <em>possession</em>.</h3>
+        <p>All the design work of an XRPL product consists of <strong>bringing closer</strong> on-chain possession and legal ownership. KYC, regulated custodians, freeze, clawback, credentials exist precisely for this. The legal qualification of the token determines the stack of obligations that piles on top of the tech.</p>
+        <p class="ta-sig">"Not your keys, not your coins" is true. But incomplete.</p>
+      </div>
+
+      <div class="ta-variant ta-advanced">
+        <span class="lvl-tag" style="background:var(--accent-own);color:var(--paper)">Advanced level</span>
+        <h3>Designing on XRPL means designing <em>alignment</em>.</h3>
+        <p>Each primitive (trustline, credential, freeze, clawback, MPT, permissioned domain) is a tool to maintain consistency across the three layers. And each qualification (security, EMT, ART, utility, other) triggers a distinct stack of obligations. Your product architecture must specify, for each flow, which primitive guarantees which alignment, and under which legal regime.</p>
+        <p class="ta-sig">If you don't know where ownership, custody and possession sit in your product, and under which regime it operates, you don't know what you're selling.</p>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <span>XRPL pedagogy · Sheet 01</span>
+    <span>Conceptual triad</span>
+  </div>
+
+</div>
+
+</div>
+
+<script>
+function setLang(lang) {
+  document.getElementById('root').setAttribute('lang', lang);
+  document.getElementById('btn-fr').classList.toggle('active', lang === 'fr');
+  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+  try { localStorage.setItem('preferred-lang', lang); } catch(e) {}
+  window.scrollTo(0, 0);
+}
+
+// Restore preference on load
+try {
+  var saved = localStorage.getItem('preferred-lang');
+  if (saved === 'en' || saved === 'fr') setLang(saved);
+} catch(e) {}
+</script>
+
+</body>
+</html>
