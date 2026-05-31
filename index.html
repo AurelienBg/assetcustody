@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr" id="root">
+<html lang="en" id="root">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,6 +17,24 @@
   --accent-poss:#d4a017;     /* or — fait */
   --muted:#6b6358;
   --rule:#1a1a1a;
+  --tint:rgba(0,0,0,0.035);  /* fond subtil des encadrés */
+  --hair:rgba(0,0,0,0.15);   /* filets pointillés / séparateurs */
+  color-scheme:light;
+}
+
+/* THÈME SOMBRE */
+html[data-theme="dark"]{
+  --ink:#ece6d8;
+  --paper:#16140f;
+  --paper-dark:#211e16;
+  --accent-own:#ec6a5e;
+  --accent-cust:#5fa3e0;
+  --accent-poss:#e6bb3f;
+  --muted:#a39a8a;
+  --rule:#ece6d8;
+  --tint:rgba(255,255,255,0.055);
+  --hair:rgba(255,255,255,0.18);
+  color-scheme:dark;
 }
 
 *{margin:0;padding:0;box-sizing:border-box}
@@ -47,7 +65,7 @@ body{
 .lvl-item{
   margin-bottom:18px;
   padding:14px 18px;
-  background:rgba(0,0,0,0.03);
+  background:var(--tint);
   border-left:3px solid var(--muted);
 }
 .lvl-item:last-child{margin-bottom:0}
@@ -96,10 +114,11 @@ body{
 h1{
   font-family:'Fraunces',serif;
   font-weight:900;
-  font-size:clamp(40px, 7vw, 84px);
+  font-size:clamp(15px, 4.9vw, 60px);
   line-height:0.95;
-  letter-spacing:-0.03em;
+  letter-spacing:-0.035em;
   margin-bottom:16px;
+  white-space:nowrap;       /* titre sur une seule ligne */
 }
 h1 .sep{color:var(--accent-own);font-weight:400;font-style:italic;font-size:0.7em;vertical-align:0.05em}
 h1 .word-own{color:var(--accent-own)}
@@ -208,7 +227,7 @@ h1 .word-poss{color:var(--accent-poss)}
   font-size:15px;
   line-height:1.4;
   padding:12px;
-  background:rgba(0,0,0,0.04);
+  background:var(--tint);
   border-left:3px solid;
 }
 .triad-card.own .quote{border-color:var(--accent-own)}
@@ -255,7 +274,7 @@ h1 .word-poss{color:var(--accent-poss)}
   border-top:1px solid var(--ink);
   vertical-align:middle;
 }
-.matrix tr:nth-child(even) td{background:rgba(0,0,0,0.025)}
+.matrix tr:nth-child(even) td{background:var(--tint)}
 .matrix .case-name{
   font-family:'Fraunces',serif;
   font-weight:600;
@@ -427,7 +446,7 @@ h1 .word-poss{color:var(--accent-poss)}
   font-family:'JetBrains Mono',monospace;
   font-size:12px;
   padding:8px 0;
-  border-bottom:1px dotted rgba(0,0,0,0.2);
+  border-bottom:1px dotted var(--hair);
 }
 .align-line:last-child{border-bottom:none}
 .align-line .who{
@@ -673,7 +692,7 @@ h1 .word-poss{color:var(--accent-poss)}
   gap:14px;
   align-items:center;
   padding:8px 0;
-  border-bottom:1px dotted rgba(0,0,0,0.15);
+  border-bottom:1px dotted var(--hair);
 }
 .dq-row:last-child{border-bottom:none}
 .dq-asset{
@@ -727,7 +746,7 @@ h1 .word-poss{color:var(--accent-poss)}
 .me-card{
   border:1px solid var(--ink);
   padding:22px 24px;
-  background:rgba(0,0,0,0.02);
+  background:var(--tint);
 }
 .me-card h4{
   font-family:'Fraunces',serif;
@@ -753,7 +772,7 @@ h1 .word-poss{color:var(--accent-poss)}
   font-size:13.5px;
   line-height:1.5;
   padding:6px 0;
-  border-bottom:1px dotted rgba(0,0,0,0.12);
+  border-bottom:1px dotted var(--hair);
   display:flex;
   align-items:flex-start;
   gap:8px;
@@ -1016,7 +1035,7 @@ h1 .word-poss{color:var(--accent-poss)}
 .regul-head{
   padding:24px 22px;
   border-bottom:2px solid var(--ink);
-  background:rgba(0,0,0,0.04);
+  background:var(--tint);
 }
 .regul-head .dot{width:12px;height:12px;margin-bottom:10px;display:block}
 .regul-head h4{
@@ -1227,7 +1246,7 @@ h1 .word-poss{color:var(--accent-poss)}
   .alignment{grid-template-columns:1fr}
   .matrix{font-size:12px}
   .matrix th,.matrix td{padding:10px 8px}
-  h1{font-size:44px}
+  /* h1 : taille gérée par le clamp responsive (une seule ligne) */
   .primitives{grid-template-columns:1fr}
   .regul-grid{grid-template-columns:1fr}
   .regul-card{border-right:none;border-bottom:2px solid var(--ink)}
@@ -1251,12 +1270,19 @@ h1 .word-poss{color:var(--accent-poss)}
 </style>
 
 <style>
-/* LANGUAGE TOGGLE */
-.lang-toggle{
+/* CONTROLS (langue + thème) */
+.controls{
   position:fixed;
   top:16px;
   right:16px;
   z-index:200;
+  display:flex;
+  gap:8px;
+  align-items:stretch;
+}
+
+/* LANGUAGE TOGGLE */
+.lang-toggle{
   background:var(--ink);
   color:var(--paper);
   border:1px solid var(--ink);
@@ -1269,6 +1295,23 @@ h1 .word-poss{color:var(--accent-poss)}
   font-weight:500;
   box-shadow:0 2px 8px rgba(0,0,0,0.15);
 }
+
+/* THEME TOGGLE */
+.theme-toggle{
+  background:var(--ink);
+  color:var(--paper);
+  border:1px solid var(--ink);
+  cursor:pointer;
+  width:38px;
+  font-size:15px;
+  line-height:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:all 0.15s;
+  box-shadow:0 2px 8px rgba(0,0,0,0.15);
+}
+.theme-toggle:hover{background:var(--paper);color:var(--ink)}
 .lang-toggle button{
   background:transparent;
   color:var(--paper);
@@ -1295,16 +1338,21 @@ html[lang="fr"] [data-lang="fr"]{display:block}
 html[lang="en"] [data-lang="en"]{display:block}
 
 @media (max-width: 860px){
-  .lang-toggle{top:10px;right:10px;font-size:10px}
+  .controls{top:10px;right:10px;gap:6px}
+  .lang-toggle{font-size:10px}
   .lang-toggle button{padding:6px 10px}
+  .theme-toggle{width:32px;font-size:14px}
 }
 </style>
 </head>
 <body>
 
-<div class="lang-toggle">
-  <button id="btn-fr" class="active" onclick="setLang('fr')">FR</button>
-  <button id="btn-en" onclick="setLang('en')">EN</button>
+<div class="controls">
+  <div class="lang-toggle">
+    <button id="btn-fr" onclick="setLang('fr')">FR</button>
+    <button id="btn-en" class="active" onclick="setLang('en')">EN</button>
+  </div>
+  <button id="btn-theme" class="theme-toggle" onclick="toggleTheme()" aria-label="Basculer clair / sombre" title="Clair / Sombre">☾</button>
 </div>
 
 <div data-lang="fr">
@@ -2814,10 +2862,33 @@ function setLang(lang) {
   window.scrollTo(0, 0);
 }
 
-// Restore preference on load
+function setTheme(theme) {
+  document.getElementById('root').setAttribute('data-theme', theme);
+  document.getElementById('btn-theme').textContent = theme === 'dark' ? '☀' : '☾';
+  try { localStorage.setItem('preferred-theme', theme); } catch(e) {}
+}
+
+function toggleTheme() {
+  var current = document.getElementById('root').getAttribute('data-theme');
+  setTheme(current === 'dark' ? 'light' : 'dark');
+}
+
+// Restore preferences on load.
+// Language defaults to EN on first visit; theme defaults to the system setting.
 try {
-  var saved = localStorage.getItem('preferred-lang');
-  if (saved === 'en' || saved === 'fr') setLang(saved);
+  var savedLang = localStorage.getItem('preferred-lang');
+  if (savedLang === 'en' || savedLang === 'fr') setLang(savedLang);
+} catch(e) {}
+
+try {
+  var savedTheme = localStorage.getItem('preferred-theme');
+  if (savedTheme === 'dark' || savedTheme === 'light') {
+    setTheme(savedTheme);
+  } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    setTheme('dark');
+  } else {
+    setTheme('light');
+  }
 } catch(e) {}
 </script>
 
